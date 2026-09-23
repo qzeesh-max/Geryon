@@ -208,3 +208,7 @@ primary_node.trigger_synchronization();
 replica_node.stop();
 primary_node.stop();
 ```
+
+## License
+
+Geryon is licensed under the [GNU Affero General Public License v3.0](LICENSE). For external dependencies, please see [CREDITS.md](CREDITS.md).
