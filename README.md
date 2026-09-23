@@ -26,34 +26,37 @@ If Replica 1 requests a page that Replica 2 currently owns, the Primary brokers 
 
 ```mermaid
 sequenceDiagram
-    participant Primary Thread
-    participant Primary Node
-    participant Replica Node
-    participant Replica Thread
+    participant Replica 1
+    participant Primary Broker
+    participant Replica 2
 
-    Note over Primary Node, Replica Node: Page P is initially owned by Primary (R/W Access)
-    Note over Replica Node: Page P has PROT_NONE
+    Note over Replica 2, Primary Broker: Page P is owned by Replica 2 (R/W Access)
+    Note over Replica 1: Page P has PROT_NONE
     
-    Replica Thread->>Replica Node: Access Page P (Read/Write)
-    activate Replica Node
-    Note over Replica Node: Segmentation Fault (SIGSEGV/EXC_BAD_ACCESS)
-    Replica Node->>Primary Node: Send PageRequest(P)
+    Replica 1->>Replica 1: Access Page P (Read/Write)
+    activate Replica 1
+    Note over Replica 1: Segmentation Fault
+    Replica 1->>Primary Broker: Send PageRequest(P)
     
-    activate Primary Node
-    Primary Node->>Primary Node: Set page_owned[P] = false
-    Primary Node->>Primary Node: mprotect(P, PROT_READ)
-    Primary Node->>Replica Node: Send PageData(P, Data)
-    Primary Node->>Primary Node: mprotect(P, PROT_NONE)
-    deactivate Primary Node
+    activate Primary Broker
+    Primary Broker->>Primary Broker: Lookup owner of P (Replica 2)
+    Primary Broker->>Replica 2: Send PageRevoke(P)
     
-    Replica Node->>Replica Node: Receive PageData(P, Data)
-    Replica Node->>Replica Node: mprotect(P, PROT_READ|PROT_WRITE)
-    Replica Node->>Replica Node: Set page_owned[P] = true
-    Replica Node-->>Replica Thread: Resume Thread Execution
-    deactivate Replica Node
+    activate Replica 2
+    Replica 2->>Replica 2: mprotect(P, PROT_NONE)
+    Replica 2->>Primary Broker: Send PageData(P, Data)
+    deactivate Replica 2
     
-    Note over Replica Node: Page P is now owned by Replica (R/W Access)
-    Note over Primary Node: Page P has PROT_NONE
+    Primary Broker->>Primary Broker: Update owner of P to Replica 1
+    Primary Broker->>Replica 1: Forward PageData(P, Data)
+    deactivate Primary Broker
+    
+    Replica 1->>Replica 1: mprotect(P, PROT_READ|PROT_WRITE)
+    Replica 1-->>Replica 1: Resume Thread Execution
+    deactivate Replica 1
+    
+    Note over Replica 1: Page P is now owned by Replica 1 (R/W Access)
+    Note over Replica 2: Page P has PROT_NONE
 ```
 
 ### Protocol Synchronization
@@ -64,7 +67,7 @@ flowchart TD
         PO[Page Owned Bitset]
         WM[Wait Mutex / CV]
         OM[Ownership Mutex]
-        SM[Socket Write Mutex]
+        SM[Per-Client Socket Mutex]
     end
 
     subgraph Fault Handler
