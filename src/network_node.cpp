@@ -155,13 +155,16 @@ void NetworkNode::handle_replica_read_header(const boost::system::error_code& er
     uint32_t page_index = ntohl(replica_read_header_.page_index);
 
     if (replica_read_header_.type == MsgType::PageRequest) {
-        bool own_page = false;
+        bool should_send = false;
         {
             std::lock_guard<std::mutex> lock(ownership_mutex_);
-            own_page = replica_page_owned_[page_index];
+            if (replica_page_owned_[page_index]) {
+                replica_page_owned_[page_index] = false;
+                should_send = true;
+            }
         }
 
-        if (own_page) {
+        if (should_send) {
             // Give up ownership and send to Primary
             send_page_data(0, page_index);
         }
@@ -187,9 +190,10 @@ void NetworkNode::handle_replica_read_data(const boost::system::error_code& erro
     uint32_t page_index = ntohl(replica_read_header_.page_index);
     std::size_t page_size = MemoryRegion::system_page_size();
     void* page_base = static_cast<char*>(region_->base_address()) + (page_index * page_size);
+    void* io_base = static_cast<char*>(region_->io_address()) + (page_index * page_size);
 
+    std::memcpy(io_base, replica_read_buffer_.data(), page_size);
     region_->set_protection(page_base, page_size, PageProtection::ReadWrite);
-    std::memcpy(page_base, replica_read_buffer_.data(), page_size);
     
     {
         std::lock_guard<std::mutex> lock(ownership_mutex_);
@@ -292,8 +296,10 @@ void NetworkNode::handle_primary_read_data(uint32_t client_id, const boost::syst
     if (next_owner == 0) {
         // Primary gets it
         void* page_base = static_cast<char*>(region_->base_address()) + (page_index * page_size);
+        void* io_base = static_cast<char*>(region_->io_address()) + (page_index * page_size);
+        
+        std::memcpy(io_base, page_data_copy.data(), page_size);
         region_->set_protection(page_base, page_size, PageProtection::ReadWrite);
-        std::memcpy(page_base, page_data_copy.data(), page_size);
 
         {
             std::lock_guard<std::mutex> lock(wait_mutex_);
@@ -359,73 +365,50 @@ bool NetworkNode::request_page(void* fault_address) {
 
     uint32_t page_index = (addr - base) / page_size;
 
-    {
-        std::lock_guard<std::mutex> lock(ownership_mutex_);
-        if (is_primary_) {
-            if (primary_page_owner_[page_index] == 0) {
-                region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
-                return true;
-            }
-        } else {
-            if (replica_page_owned_[page_index]) {
-                region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
-                return true;
-            }
-        }
-    }
-
     std::unique_lock<std::mutex> lock(wait_mutex_);
     
-    // Double check
-    {
-        std::lock_guard<std::mutex> own_lock(ownership_mutex_);
-        if (is_primary_) {
-            if (primary_page_owner_[page_index] == 0) {
-                region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
-                return true;
-            }
-        } else {
-            if (replica_page_owned_[page_index]) {
-                region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
-                return true;
-            }
-        }
-    }
-
-    page_received_[page_index] = false;
-
-    // Send request
-    if (!is_primary_) {
-        // Replica sends request to Primary (0)
-        if (!page_request_in_flight_[page_index]) {
-            page_request_in_flight_[page_index] = true;
-            send_page_request(0, page_index);
-        }
-    } else {
-        // Primary queues itself. 
-        bool is_first_waiter = false;
-        uint32_t current_owner = 0;
-        bool already_in_queue = false;
+    while (true) {
+        bool owned = false;
         {
             std::lock_guard<std::mutex> own_lock(ownership_mutex_);
-            already_in_queue = page_request_in_flight_[page_index];
-            if (!already_in_queue) {
-                page_request_in_flight_[page_index] = true;
-                is_first_waiter = primary_page_waiters_[page_index].empty();
-                primary_page_waiters_[page_index].push(0);
+            if (is_primary_) {
+                if (primary_page_owner_[page_index] == 0) owned = true;
+            } else {
+                if (replica_page_owned_[page_index]) owned = true;
             }
-            current_owner = primary_page_owner_[page_index];
         }
         
-        if (!already_in_queue && is_first_waiter) {
-            send_page_request(current_owner, page_index);
+        if (owned) {
+            region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
+            break;
         }
+        
+        bool in_flight = false;
+        {
+            std::lock_guard<std::mutex> own_lock(ownership_mutex_);
+            in_flight = page_request_in_flight_[page_index];
+            if (!in_flight) {
+                page_request_in_flight_[page_index] = true;
+            }
+        }
+
+        if (!in_flight) {
+            if (!is_primary_) {
+                send_page_request(0, page_index);
+            } else {
+                uint32_t current_owner = 0;
+                {
+                    std::lock_guard<std::mutex> own_lock(ownership_mutex_);
+                    current_owner = primary_page_owner_[page_index];
+                    primary_page_waiters_[page_index].push(0);
+                }
+                send_page_request(current_owner, page_index);
+            }
+        }
+        
+        wait_cv_.wait(lock);
     }
-
-    wait_cv_.wait(lock, [this, page_index]() {
-        return page_received_[page_index];
-    });
-
+    
     return true;
 }
 
@@ -466,14 +449,12 @@ void NetworkNode::send_page_data(uint32_t target_node_id, uint32_t page_index) {
         // REPLICA LOGIC: send to Primary
         std::lock_guard<std::mutex> write_lock(replica_socket_write_mutex_);
 
-        {
-            std::lock_guard<std::mutex> lock(ownership_mutex_);
-            replica_page_owned_[page_index] = false;
-        }
+        // Ownership has already been relinquished by the caller
 
-        region_->set_protection(page_base, page_size, PageProtection::ReadOnly);
-        std::memcpy(data_buffer->data(), page_base, page_size);
+        void* io_base = static_cast<char*>(region_->io_address()) + (page_index * page_size);
+
         region_->set_protection(page_base, page_size, PageProtection::None);
+        std::memcpy(data_buffer->data(), io_base, page_size);
 
         std::array<boost::asio::const_buffer, 2> buffers = {
             boost::asio::buffer(header.get(), sizeof(MsgHeader)),
@@ -503,9 +484,10 @@ void NetworkNode::send_page_data(uint32_t target_node_id, uint32_t page_index) {
                 }
             }
 
-            region_->set_protection(page_base, page_size, PageProtection::ReadOnly);
-            std::memcpy(data_buffer->data(), page_base, page_size);
+            void* io_base = static_cast<char*>(region_->io_address()) + (page_index * page_size);
+
             region_->set_protection(page_base, page_size, PageProtection::None);
+            std::memcpy(data_buffer->data(), io_base, page_size);
 
             std::array<boost::asio::const_buffer, 2> buffers = {
                 boost::asio::buffer(header.get(), sizeof(MsgHeader)),
@@ -574,12 +556,15 @@ void NetworkNode::trigger_synchronization() {
         }
     } else {
         for (std::size_t i = 0; i < num_pages; ++i) {
-            bool is_owned = false;
+            bool should_send = false;
             {
                 std::lock_guard<std::mutex> lock(ownership_mutex_);
-                is_owned = replica_page_owned_[i];
+                if (replica_page_owned_[i]) {
+                    replica_page_owned_[i] = false;
+                    should_send = true;
+                }
             }
-            if (is_owned) {
+            if (should_send) {
                 send_page_data(0, i);
             }
         }

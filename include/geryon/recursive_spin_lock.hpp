@@ -2,6 +2,11 @@
 
 #include <atomic>
 #include <thread>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 namespace geryon {
 
@@ -9,9 +14,21 @@ class recursive_spin_lock {
 public:
     recursive_spin_lock() noexcept : owner_(0), recursion_count_(0) {}
 
-    void lock() noexcept {
+    static std::size_t get_current_owner_id() noexcept {
         auto current_thread_id = std::this_thread::get_id();
-        auto current_id_hash = std::hash<std::thread::id>{}(current_thread_id);
+        std::size_t thread_hash = std::hash<std::thread::id>{}(current_thread_id);
+#ifdef _WIN32
+        std::size_t pid = GetCurrentProcessId();
+#else
+        std::size_t pid = getpid();
+#endif
+        // Mix PID with thread hash. Left shift PID to affect higher bits, xor to combine.
+        // This ensures the owner ID is unique across different processes.
+        return thread_hash ^ (pid << 16) ^ (pid << 32);
+    }
+
+    void lock() noexcept {
+        std::size_t current_id_hash = get_current_owner_id();
 
         if (owner_.load(std::memory_order_relaxed) == current_id_hash) {
             ++recursion_count_;
@@ -31,8 +48,7 @@ public:
     }
 
     void unlock() noexcept {
-        auto current_thread_id = std::this_thread::get_id();
-        auto current_id_hash = std::hash<std::thread::id>{}(current_thread_id);
+        std::size_t current_id_hash = get_current_owner_id();
 
         if (owner_.load(std::memory_order_relaxed) != current_id_hash) {
             // Cannot unlock if we do not own the lock

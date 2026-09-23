@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -20,4 +20,4 @@ RUN mkdir -p build-linux && cd build-linux && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make -j$(nproc)
 
-CMD ["cd", "build-linux", "&&", "ctest", "--output-on-failure"]
+CMD sh -c "cd build-linux && ctest --output-on-failure"

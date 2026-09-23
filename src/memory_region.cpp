@@ -7,6 +7,10 @@
 #else
 #include <sys/mman.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <atomic>
 #endif
 
 namespace geryon {
@@ -26,26 +30,74 @@ MemoryRegion::MemoryRegion(std::size_t size) {
     size_ = (size + page_size - 1) / page_size * page_size;
 
 #ifdef _WIN32
-    base_address_ = VirtualAlloc(NULL, size_, MEM_RESERVE | MEM_COMMIT, PAGE_NOACCESS);
+    mapping_handle_ = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size_, NULL);
+    if (!mapping_handle_) {
+        throw std::system_error(GetLastError(), std::system_category(), "CreateFileMappingA failed");
+    }
+
+    base_address_ = MapViewOfFile(mapping_handle_, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, size_);
     if (!base_address_) {
-        throw std::system_error(GetLastError(), std::system_category(), "VirtualAlloc failed");
+        CloseHandle(mapping_handle_);
+        throw std::system_error(GetLastError(), std::system_category(), "MapViewOfFile failed");
+    }
+
+    DWORD old_prot;
+    if (!VirtualProtect(base_address_, size_, PAGE_NOACCESS, &old_prot)) {
+        UnmapViewOfFile(base_address_);
+        CloseHandle(mapping_handle_);
+        throw std::system_error(GetLastError(), std::system_category(), "VirtualProtect failed on base_address");
+    }
+
+    io_address_ = MapViewOfFile(mapping_handle_, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, size_);
+    if (!io_address_) {
+        UnmapViewOfFile(base_address_);
+        CloseHandle(mapping_handle_);
+        throw std::system_error(GetLastError(), std::system_category(), "MapViewOfFile for io_address failed");
     }
 #else
-    base_address_ = mmap(nullptr, size_, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (base_address_ == MAP_FAILED) {
-        throw std::system_error(errno, std::generic_category(), "mmap failed");
+    static std::atomic<int> region_counter{0};
+    char shm_name[64];
+    snprintf(shm_name, sizeof(shm_name), "/geryon_shm_%d_%d", getpid(), region_counter.fetch_add(1));
+    
+    int fd = shm_open(shm_name, O_RDWR | O_CREAT | O_EXCL, 0600);
+    if (fd < 0) {
+        throw std::system_error(errno, std::generic_category(), "shm_open failed");
     }
+    
+    // Immediately unlink so it cleans up when closed
+    shm_unlink(shm_name);
+
+    if (ftruncate(fd, size_) != 0) {
+        close(fd);
+        throw std::system_error(errno, std::generic_category(), "ftruncate failed");
+    }
+
+    base_address_ = mmap(nullptr, size_, PROT_NONE, MAP_SHARED, fd, 0);
+    if (base_address_ == MAP_FAILED) {
+        close(fd);
+        throw std::system_error(errno, std::generic_category(), "mmap base_address failed");
+    }
+
+    io_address_ = mmap(nullptr, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (io_address_ == MAP_FAILED) {
+        munmap(base_address_, size_);
+        close(fd);
+        throw std::system_error(errno, std::generic_category(), "mmap io_address failed");
+    }
+
+    close(fd);
 #endif
 }
 
 MemoryRegion::~MemoryRegion() {
-    if (base_address_) {
 #ifdef _WIN32
-        VirtualFree(base_address_, 0, MEM_RELEASE);
+    if (base_address_) UnmapViewOfFile(base_address_);
+    if (io_address_) UnmapViewOfFile(io_address_);
+    if (mapping_handle_) CloseHandle(mapping_handle_);
 #else
-        munmap(base_address_, size_);
+    if (base_address_) munmap(base_address_, size_);
+    if (io_address_) munmap(io_address_, size_);
 #endif
-    }
 }
 
 void MemoryRegion::set_protection(void* address, std::size_t length, PageProtection prot) {

@@ -1,6 +1,10 @@
 #pragma once
 #include <cstddef>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace geryon {
 
 enum class PageProtection {
@@ -20,6 +24,7 @@ public:
     MemoryRegion& operator=(const MemoryRegion&) = delete;
 
     void* base_address() const noexcept { return base_address_; }
+    void* io_address() const noexcept { return io_address_; }
     std::size_t size() const noexcept { return size_; }
 
     // Change protection for a specific sub-region.
@@ -31,7 +36,11 @@ public:
 
 private:
     void* base_address_{nullptr};
+    void* io_address_{nullptr};
     std::size_t size_{0};
+#ifdef _WIN32
+    HANDLE mapping_handle_{NULL};
+#endif
 };
 
 } // namespace geryon
