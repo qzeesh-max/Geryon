@@ -1,1 +1,2 @@
-8:SynchronizationTest.DistributedSpinLock
+13:CorrectnessTest.MultithreadMultipageCorrectness
+14:CorrectnessTest.MultiprocessMultipageCorrectness

@@ -117,11 +117,41 @@ tests/CMakeFiles/geryon_tests.dir/test_network_sync.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_network_sync.cpp.s"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_network_sync.cpp -o CMakeFiles/geryon_tests.dir/test_network_sync.cpp.s
 
+tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: tests/CMakeFiles/geryon_tests.dir/flags.make
+tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
+tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp
+tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj -MF CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj.d -o CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp
+
+tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/geryon_tests.dir/test_multi_client.cpp.i"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp > CMakeFiles/geryon_tests.dir/test_multi_client.cpp.i
+
+tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp -o CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s
+
+tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: tests/CMakeFiles/geryon_tests.dir/flags.make
+tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
+tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp
+tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj -MF CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj.d -o CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp
+
+tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/geryon_tests.dir/test_synchronization.cpp.i"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp > CMakeFiles/geryon_tests.dir/test_synchronization.cpp.i
+
+tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_synchronization.cpp.s"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp -o CMakeFiles/geryon_tests.dir/test_synchronization.cpp.s
+
 tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj: tests/CMakeFiles/geryon_tests.dir/flags.make
 tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
 tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_interprocess.cpp
 tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj -MF CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj.d -o CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_interprocess.cpp
 
 tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.i: cmake_force
@@ -136,7 +166,7 @@ tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj: tests/CMakeFi
 tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
 tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_memnon_integration.cpp
 tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj -MF CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj.d -o CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_memnon_integration.cpp
 
 tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.i: cmake_force
@@ -146,36 +176,6 @@ tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.i: cmake_force
 tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.s"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_memnon_integration.cpp -o CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.s
-
-tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: tests/CMakeFiles/geryon_tests.dir/flags.make
-tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
-tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp
-tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj"
-	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj -MF CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj.d -o CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp
-
-tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/geryon_tests.dir/test_synchronization.cpp.i"
-	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp > CMakeFiles/geryon_tests.dir/test_synchronization.cpp.i
-
-tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_synchronization.cpp.s"
-	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_synchronization.cpp -o CMakeFiles/geryon_tests.dir/test_synchronization.cpp.s
-
-tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: tests/CMakeFiles/geryon_tests.dir/flags.make
-tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
-tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp
-tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj"
-	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj -MF CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj.d -o CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp
-
-tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/geryon_tests.dir/test_multi_client.cpp.i"
-	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp > CMakeFiles/geryon_tests.dir/test_multi_client.cpp.i
-
-tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s"
-	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp -o CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s
 
 tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.obj: tests/CMakeFiles/geryon_tests.dir/flags.make
 tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
@@ -192,16 +192,32 @@ tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_consistency.cpp.s"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_consistency.cpp -o CMakeFiles/geryon_tests.dir/test_consistency.cpp.s
 
+tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj: tests/CMakeFiles/geryon_tests.dir/flags.make
+tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj: tests/CMakeFiles/geryon_tests.dir/includes_CXX.rsp
+tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_correctness.cpp
+tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj -MF CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj.d -o CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_correctness.cpp
+
+tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/geryon_tests.dir/test_correctness.cpp.i"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_correctness.cpp > CMakeFiles/geryon_tests.dir/test_correctness.cpp.i
+
+tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_correctness.cpp.s"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && /opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_correctness.cpp -o CMakeFiles/geryon_tests.dir/test_correctness.cpp.s
+
 # Object files for target geryon_tests
 geryon_tests_OBJECTS = \
 "CMakeFiles/geryon_tests.dir/test_memory_region.cpp.obj" \
 "CMakeFiles/geryon_tests.dir/test_fault_handler.cpp.obj" \
 "CMakeFiles/geryon_tests.dir/test_network_sync.cpp.obj" \
+"CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj" \
+"CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj" \
 "CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj" \
 "CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj" \
-"CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj" \
-"CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj" \
-"CMakeFiles/geryon_tests.dir/test_consistency.cpp.obj"
+"CMakeFiles/geryon_tests.dir/test_consistency.cpp.obj" \
+"CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj"
 
 # External object files for target geryon_tests
 geryon_tests_EXTERNAL_OBJECTS =
@@ -209,11 +225,12 @@ geryon_tests_EXTERNAL_OBJECTS =
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_memory_region.cpp.obj
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_fault_handler.cpp.obj
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_network_sync.cpp.obj
+tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj
+tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.obj
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.obj
-tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.obj
-tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.obj
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.obj
+tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.obj
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/build.make
 tests/geryon_tests.exe: libgeryon.a
 tests/geryon_tests.exe: lib/libgtest_main.a
@@ -221,7 +238,7 @@ tests/geryon_tests.exe: lib/libgtest.a
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/linkLibs.rsp
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/objects1.rsp
 tests/geryon_tests.exe: tests/CMakeFiles/geryon_tests.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable geryon_tests.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable geryon_tests.exe"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/geryon_tests.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

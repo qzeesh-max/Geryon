@@ -96,8 +96,9 @@ private:
     // Fault handling sync (Both Primary and Replica)
     std::mutex wait_mutex_;
     std::condition_variable wait_cv_;
-    uint32_t waiting_for_page_{0xFFFFFFFF};
-    bool page_received_{false};
+    // Single-page wait variables (DEPRECATED, replace with vectors)
+    std::vector<bool> page_received_;
+    std::vector<bool> page_request_in_flight_;
     
     // Page ownership tracking
     // For Replica: true if it owns the page

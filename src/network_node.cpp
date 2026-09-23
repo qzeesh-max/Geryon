@@ -21,6 +21,8 @@ NetworkNode::NetworkNode(MemoryRegion* region, bool initial_owner)
         replica_page_owned_.resize(num_pages, false);
         replica_read_buffer_.resize(MemoryRegion::system_page_size());
     }
+    page_received_.resize(num_pages, false);
+    page_request_in_flight_.resize(num_pages, false);
 }
 
 NetworkNode::~NetworkNode() {
@@ -196,10 +198,9 @@ void NetworkNode::handle_replica_read_data(const boost::system::error_code& erro
 
     {
         std::lock_guard<std::mutex> lock(wait_mutex_);
-        if (waiting_for_page_ == page_index) {
-            page_received_ = true;
-            wait_cv_.notify_all();
-        }
+        page_received_[page_index] = true;
+        page_request_in_flight_[page_index] = false;
+        wait_cv_.notify_all();
     }
 
     start_replica_read_loop();
@@ -296,21 +297,25 @@ void NetworkNode::handle_primary_read_data(uint32_t client_id, const boost::syst
 
         {
             std::lock_guard<std::mutex> lock(wait_mutex_);
-            if (waiting_for_page_ == page_index) {
-                page_received_ = true;
-                wait_cv_.notify_all();
-            }
+            page_received_[page_index] = true;
+            page_request_in_flight_[page_index] = false;
+            wait_cv_.notify_all();
         }
         
         // If there are more waiters, primary must immediately send it to the next
+        uint32_t next_target = 0;
+        bool forward_needed = false;
         if (has_more_waiters) {
-            uint32_t next_target;
             {
                 std::lock_guard<std::mutex> lock(ownership_mutex_);
-                next_target = primary_page_waiters_[page_index].front();
+                if (!primary_page_waiters_[page_index].empty()) {
+                    next_target = primary_page_waiters_[page_index].front();
+                    forward_needed = true;
+                }
             }
-            // Primary immediately sends it!
-            send_page_data(next_target, page_index);
+            if (forward_needed) {
+                send_page_data(next_target, page_index);
+            }
         }
     } else {
         // Forward data to the next owner replica!
@@ -387,34 +392,40 @@ bool NetworkNode::request_page(void* fault_address) {
         }
     }
 
-    waiting_for_page_ = page_index;
-    page_received_ = false;
+    page_received_[page_index] = false;
 
     // Send request
     if (!is_primary_) {
         // Replica sends request to Primary (0)
-        send_page_request(0, page_index);
+        if (!page_request_in_flight_[page_index]) {
+            page_request_in_flight_[page_index] = true;
+            send_page_request(0, page_index);
+        }
     } else {
         // Primary queues itself. 
         bool is_first_waiter = false;
         uint32_t current_owner = 0;
+        bool already_in_queue = false;
         {
             std::lock_guard<std::mutex> own_lock(ownership_mutex_);
-            is_first_waiter = primary_page_waiters_[page_index].empty();
-            primary_page_waiters_[page_index].push(0);
+            already_in_queue = page_request_in_flight_[page_index];
+            if (!already_in_queue) {
+                page_request_in_flight_[page_index] = true;
+                is_first_waiter = primary_page_waiters_[page_index].empty();
+                primary_page_waiters_[page_index].push(0);
+            }
             current_owner = primary_page_owner_[page_index];
         }
         
-        if (is_first_waiter) {
+        if (!already_in_queue && is_first_waiter) {
             send_page_request(current_owner, page_index);
         }
     }
 
     wait_cv_.wait(lock, [this, page_index]() {
-        return page_received_ && waiting_for_page_ == page_index;
+        return page_received_[page_index];
     });
 
-    waiting_for_page_ = 0xFFFFFFFF;
     return true;
 }
 

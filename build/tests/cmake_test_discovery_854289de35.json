@@ -1,5 +1,5 @@
 {
-  "tests": 12,
+  "tests": 14,
   "name": "AllTests",
   "testsuites": [
     {
@@ -46,6 +46,28 @@
       ]
     },
     {
+      "name": "MultiClientTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "StarTopologyBouncing",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_multi_client.cpp",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "name": "SynchronizationTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "DistributedSpinLock",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_synchronization.cpp",
+          "line": 17
+        }
+      ]
+    },
+    {
       "name": "InterprocessTest",
       "tests": 1,
       "testsuite": [
@@ -68,28 +90,6 @@
       ]
     },
     {
-      "name": "SynchronizationTest",
-      "tests": 1,
-      "testsuite": [
-        {
-          "name": "DistributedSpinLock",
-          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_synchronization.cpp",
-          "line": 17
-        }
-      ]
-    },
-    {
-      "name": "MultiClientTest",
-      "tests": 1,
-      "testsuite": [
-        {
-          "name": "StarTopologyBouncing",
-          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_multi_client.cpp",
-          "line": 17
-        }
-      ]
-    },
-    {
       "name": "ConsistencyTest",
       "tests": 3,
       "testsuite": [
@@ -107,6 +107,22 @@
           "name": "PrimaryStopInitiatesHandshake",
           "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_consistency.cpp",
           "line": 86
+        }
+      ]
+    },
+    {
+      "name": "CorrectnessTest",
+      "tests": 2,
+      "testsuite": [
+        {
+          "name": "MultithreadMultipageCorrectness",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_correctness.cpp",
+          "line": 22
+        },
+        {
+          "name": "MultiprocessMultipageCorrectness",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_correctness.cpp",
+          "line": 159
         }
       ]
     }

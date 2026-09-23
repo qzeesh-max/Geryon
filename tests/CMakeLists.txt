@@ -2,11 +2,12 @@ add_executable(geryon_tests
     test_memory_region.cpp
     test_fault_handler.cpp
     test_network_sync.cpp
+    test_multi_client.cpp
+    test_synchronization.cpp
     test_interprocess.cpp
     test_memnon_integration.cpp
-    test_synchronization.cpp
-    test_multi_client.cpp
     test_consistency.cpp
+    test_correctness.cpp
 )
 
 target_link_libraries(geryon_tests

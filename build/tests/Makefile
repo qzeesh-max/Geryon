@@ -209,6 +209,30 @@ test_consistency.cpp.s:
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.s
 .PHONY : test_consistency.cpp.s
 
+test_correctness.o: test_correctness.cpp.o
+.PHONY : test_correctness.o
+
+# target to build an object file
+test_correctness.cpp.o:
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.o
+.PHONY : test_correctness.cpp.o
+
+test_correctness.i: test_correctness.cpp.i
+.PHONY : test_correctness.i
+
+# target to preprocess a source file
+test_correctness.cpp.i:
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.i
+.PHONY : test_correctness.cpp.i
+
+test_correctness.s: test_correctness.cpp.s
+.PHONY : test_correctness.s
+
+# target to generate assembly for a file
+test_correctness.cpp.s:
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/test_correctness.cpp.s
+.PHONY : test_correctness.cpp.s
+
 test_fault_handler.o: test_fault_handler.cpp.o
 .PHONY : test_fault_handler.o
 
@@ -394,6 +418,9 @@ help:
 	@echo "... test_consistency.o"
 	@echo "... test_consistency.i"
 	@echo "... test_consistency.s"
+	@echo "... test_correctness.o"
+	@echo "... test_correctness.i"
+	@echo "... test_correctness.s"
 	@echo "... test_fault_handler.o"
 	@echo "... test_fault_handler.i"
 	@echo "... test_fault_handler.s"
