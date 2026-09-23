@@ -33,4 +33,6 @@ if [ ! -f "$EXE_PATH" ]; then
 fi
 
 echo "Running Windows test suite via CrossOver (bottle: '$BOTTLE_NAME')..."
-"$CROSSOVER_WINE" --bottle "$BOTTLE_NAME" --cx-app "$EXE_PATH" "$@"
+# Use CX_BOTTLE env var so wine can resolve Mac-side paths directly
+# without requiring the exe to be inside drive_c.
+CX_BOTTLE="$BOTTLE_NAME" "$CROSSOVER_WINE" "$EXE_PATH" "$@"
