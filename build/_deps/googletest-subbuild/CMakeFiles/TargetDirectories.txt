@@ -1,3 +1,0 @@
-/Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-subbuild/CMakeFiles/googletest-populate.dir
-/Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-subbuild/CMakeFiles/edit_cache.dir
-/Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-subbuild/CMakeFiles/rebuild_cache.dir
