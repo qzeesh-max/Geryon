@@ -1,3 +1,0 @@
-/opt/homebrew/bin/cmake -E rm -f CMakeFiles/benchmark_page_transfer.dir/objects.a
-/opt/homebrew/bin/x86_64-w64-mingw32-ar qc CMakeFiles/benchmark_page_transfer.dir/objects.a @CMakeFiles/benchmark_page_transfer.dir/objects1.rsp
-/opt/homebrew/bin/x86_64-w64-mingw32-g++ -O3 -DNDEBUG -static -lws2_32 -lwsock32 -Wl,--whole-archive CMakeFiles/benchmark_page_transfer.dir/objects.a -Wl,--no-whole-archive -o benchmark_page_transfer.exe -Wl,--out-implib,libbenchmark_page_transfer.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/benchmark_page_transfer.dir/linkLibs.rsp

@@ -1,2 +1,0 @@
-/opt/homebrew/bin/x86_64-w64-mingw32-ar qc libgeryon.a CMakeFiles/geryon.dir/src/memory_region.cpp.obj CMakeFiles/geryon.dir/src/fault_handler.cpp.obj CMakeFiles/geryon.dir/src/network_node.cpp.obj
-/opt/homebrew/bin/x86_64-w64-mingw32-ranlib libgeryon.a
