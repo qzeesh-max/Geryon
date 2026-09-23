@@ -12,6 +12,7 @@ Geryon supports integration with existing memory mapping and interprocess commun
 *   **Cross-Platform Architecture:** Native implementations for macOS/iOS (Mach exception handling), Linux (sigaction + mprotect), and Windows (Vectored Exception Handling + VirtualAlloc).
 *   **Transparent Page Fault Synchronization:** Geryon traps segmentation faults (soft faults) natively and orchestrates "Bouncing Ownership" page retrieval over TCP sockets, completely transparent to the accessing threads.
 *   **Distributed Concurrency Control:** Includes a custom `geryon::recursive_spin_lock` which natively supports network backoff, mitigating lock starvation when pages rapidly bounce between nodes.
+*   **Manual State Synchronization:** Forces cache consistency by manually flushing pages from replicas back to the primary, paired with a graceful connection teardown handshake.
 *   **Third-Party Allocator Integration:** Easily drop-in advanced memory managers (e.g., `boost::interprocess` managed segments) and let Geryon handle the synchronization underneath.
 
 ## Architecture
@@ -125,10 +126,10 @@ Geryon comes with a suite of integration, stress, and unit tests designed to sim
 ./build/benchmarks/benchmark_page_transfer
 ```
 
-### Docker (Cross-Platform Testing)
-To test Linux builds on macOS:
+### Docker (Cross-Platform Testing on Linux)
+To test Linux builds natively on macOS/Windows using Docker:
 ```bash
-./docker/run_linux_tests_on_mac.sh
+./scripts/run_linux_tests_docker.sh
 ```
 
 ### Windows (Cross-Compilation & CrossOver)
@@ -193,4 +194,17 @@ SharedState* state = reinterpret_cast<SharedState*>(region.base_address());
 state->lock.lock();
 state->data++;
 state->lock.unlock();
+```
+
+### 4. Manual Synchronization & Teardown
+
+To ensure consistency of shared state without relying on page faults, you can trigger a manual synchronization. When a node is shutting down, it automatically initiates a handshake to ensure no data is lost.
+
+```cpp
+// Primary pulls all currently modified pages from Replicas
+primary_node.trigger_synchronization();
+
+// Graceful stop ensuring all data is flushed and synchronized
+replica_node.stop();
+primary_node.stop();
 ```

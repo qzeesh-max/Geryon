@@ -25,5 +25,6 @@ if [ ! -f "$EXE_PATH" ]; then
     exit 1
 fi
 
+shift 2
 echo "Running Windows executable using CrossOver in bottle: $BOTTLE_NAME"
-"$CROSSOVER_CMD" --bottle "$BOTTLE_NAME" "$EXE_PATH"
+"$CROSSOVER_CMD" --bottle "$BOTTLE_NAME" "$EXE_PATH" "$@"

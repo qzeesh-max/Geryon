@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/geryon_tests.dir/test_consistency.cpp.o"
+  "CMakeFiles/geryon_tests.dir/test_consistency.cpp.o.d"
   "CMakeFiles/geryon_tests.dir/test_fault_handler.cpp.o"
   "CMakeFiles/geryon_tests.dir/test_fault_handler.cpp.o.d"
   "CMakeFiles/geryon_tests.dir/test_interprocess.cpp.o"

@@ -1,5 +1,5 @@
 {
-  "tests": 9,
+  "tests": 12,
   "name": "AllTests",
   "testsuites": [
     {
@@ -86,6 +86,27 @@
           "name": "StarTopologyBouncing",
           "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_multi_client.cpp",
           "line": 17
+        }
+      ]
+    },
+    {
+      "name": "ConsistencyTest",
+      "tests": 3,
+      "testsuite": [
+        {
+          "name": "TriggerSynchronization",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_consistency.cpp",
+          "line": 17
+        },
+        {
+          "name": "ReplicaStopFlushesData",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_consistency.cpp",
+          "line": 58
+        },
+        {
+          "name": "PrimaryStopInitiatesHandshake",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_consistency.cpp",
+          "line": 86
         }
       ]
     }

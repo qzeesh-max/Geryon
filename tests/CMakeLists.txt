@@ -6,6 +6,7 @@ add_executable(geryon_tests
     test_memnon_integration.cpp
     test_synchronization.cpp
     test_multi_client.cpp
+    test_consistency.cpp
 )
 
 target_link_libraries(geryon_tests

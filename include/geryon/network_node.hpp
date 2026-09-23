@@ -35,6 +35,9 @@ public:
     // Blocks the thread until the page is fetched from the network.
     bool request_page(void* fault_address);
 
+    // Forces all pages back to the Primary and ensures consistency
+    void trigger_synchronization();
+
 private:
     void accept_connection();
     
@@ -50,6 +53,8 @@ private:
     
     void send_page_request(uint32_t target_node_id, uint32_t page_index);
     void send_page_data(uint32_t target_node_id, uint32_t page_index);
+    void send_sync_request(uint32_t target_node_id);
+    void send_sync_response(uint32_t target_node_id);
 
     MemoryRegion* region_;
     bool is_primary_;
@@ -70,7 +75,9 @@ private:
     // Protocol state
     enum class MsgType : uint8_t {
         PageRequest = 1,
-        PageData = 2
+        PageData = 2,
+        SyncRequest = 3,
+        SyncResponse = 4
     };
     
     struct __attribute__((packed)) MsgHeader {
@@ -106,6 +113,11 @@ private:
     
     // Socket synchronization for Replica
     std::mutex replica_socket_write_mutex_;
+
+    // Consistency sync logic
+    std::condition_variable sync_cv_;
+    std::atomic<int> pending_sync_responses_{0};
+    std::atomic<bool> is_stopping_{false};
 };
 
 } // namespace geryon

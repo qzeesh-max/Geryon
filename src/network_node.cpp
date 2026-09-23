@@ -65,6 +65,33 @@ void NetworkNode::start_replica(const std::string& host, uint16_t port) {
 }
 
 void NetworkNode::stop() {
+    if (is_stopping_) return;
+    is_stopping_ = true;
+
+    if (is_primary_) {
+        std::vector<uint32_t> client_ids;
+        for (const auto& [id, _] : clients_) {
+            client_ids.push_back(id);
+        }
+        
+        if (!client_ids.empty()) {
+            pending_sync_responses_ = client_ids.size();
+            for (uint32_t id : client_ids) {
+                send_sync_request(id);
+            }
+            
+            std::unique_lock<std::mutex> lock(wait_mutex_);
+            sync_cv_.wait_for(lock, std::chrono::seconds(2), [this]() {
+                return pending_sync_responses_ <= 0;
+            });
+        }
+    } else {
+        trigger_synchronization();
+        if (replica_socket_ && replica_socket_->is_open()) {
+            send_sync_response(0);
+        }
+    }
+
     io_context_.stop();
     if (replica_socket_ && replica_socket_->is_open()) {
         boost::system::error_code ec;
@@ -136,6 +163,12 @@ void NetworkNode::handle_replica_read_header(const boost::system::error_code& er
             // Give up ownership and send to Primary
             send_page_data(0, page_index);
         }
+        start_replica_read_loop();
+    } else if (replica_read_header_.type == MsgType::SyncRequest) {
+        trigger_synchronization();
+        send_sync_response(0);
+        start_replica_read_loop();
+    } else if (replica_read_header_.type == MsgType::SyncResponse) {
         start_replica_read_loop();
     } else if (replica_read_header_.type == MsgType::PageData) {
         boost::asio::async_read(*replica_socket_,
@@ -213,6 +246,15 @@ void NetworkNode::handle_primary_read_header(uint32_t client_id, const boost::sy
                 send_page_request(current_owner, page_index);
             }
         }
+        start_primary_read_loop(client_id);
+    } else if (primary_read_headers_[client_id].type == MsgType::SyncResponse) {
+        pending_sync_responses_--;
+        if (pending_sync_responses_ <= 0) {
+            std::lock_guard<std::mutex> lock(wait_mutex_);
+            sync_cv_.notify_all();
+        }
+        start_primary_read_loop(client_id);
+    } else if (primary_read_headers_[client_id].type == MsgType::SyncRequest) {
         start_primary_read_loop(client_id);
     } else if (primary_read_headers_[client_id].type == MsgType::PageData) {
         // Replica returned a page
@@ -471,6 +513,64 @@ void NetworkNode::send_page_data(uint32_t target_node_id, uint32_t page_index) {
         }
         if (has_more_waiters) {
             send_page_request(target_node_id, page_index);
+        }
+    }
+}
+
+void NetworkNode::send_sync_request(uint32_t target_node_id) {
+    auto header = std::make_shared<MsgHeader>();
+    header->type = MsgType::SyncRequest;
+    header->page_index = 0; 
+    
+    boost::system::error_code ec;
+    if (!is_primary_) {
+        std::lock_guard<std::mutex> lock(replica_socket_write_mutex_);
+        boost::asio::write(*replica_socket_, boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+    } else {
+        std::lock_guard<std::mutex> lock(*client_write_mutexes_[target_node_id]);
+        boost::asio::write(*clients_[target_node_id], boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+    }
+}
+
+void NetworkNode::send_sync_response(uint32_t target_node_id) {
+    auto header = std::make_shared<MsgHeader>();
+    header->type = MsgType::SyncResponse;
+    header->page_index = 0; 
+    
+    boost::system::error_code ec;
+    if (!is_primary_) {
+        std::lock_guard<std::mutex> lock(replica_socket_write_mutex_);
+        boost::asio::write(*replica_socket_, boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+    } else {
+        std::lock_guard<std::mutex> lock(*client_write_mutexes_[target_node_id]);
+        boost::asio::write(*clients_[target_node_id], boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+    }
+}
+
+void NetworkNode::trigger_synchronization() {
+    std::size_t num_pages = region_->size() / MemoryRegion::system_page_size();
+    if (is_primary_) {
+        for (std::size_t i = 0; i < num_pages; ++i) {
+            bool requires_pull = false;
+            {
+                std::lock_guard<std::mutex> lock(ownership_mutex_);
+                requires_pull = (primary_page_owner_[i] != 0);
+            }
+            if (requires_pull) {
+                void* page_addr = static_cast<char*>(region_->base_address()) + (i * MemoryRegion::system_page_size());
+                request_page(page_addr);
+            }
+        }
+    } else {
+        for (std::size_t i = 0; i < num_pages; ++i) {
+            bool is_owned = false;
+            {
+                std::lock_guard<std::mutex> lock(ownership_mutex_);
+                is_owned = replica_page_owned_[i];
+            }
+            if (is_owned) {
+                send_page_data(0, i);
+            }
         }
     }
 }

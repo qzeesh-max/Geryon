@@ -170,6 +170,20 @@ tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests && /opt/homebrew/bin/g++-16 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_multi_client.cpp -o CMakeFiles/geryon_tests.dir/test_multi_client.cpp.s
 
+tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.o: tests/CMakeFiles/geryon_tests.dir/flags.make
+tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.o: /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_consistency.cpp
+tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.o: tests/CMakeFiles/geryon_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.o"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests && /opt/homebrew/bin/g++-16 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.o -MF CMakeFiles/geryon_tests.dir/test_consistency.cpp.o.d -o CMakeFiles/geryon_tests.dir/test_consistency.cpp.o -c /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_consistency.cpp
+
+tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/geryon_tests.dir/test_consistency.cpp.i"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests && /opt/homebrew/bin/g++-16 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_consistency.cpp > CMakeFiles/geryon_tests.dir/test_consistency.cpp.i
+
+tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/geryon_tests.dir/test_consistency.cpp.s"
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests && /opt/homebrew/bin/g++-16 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_consistency.cpp -o CMakeFiles/geryon_tests.dir/test_consistency.cpp.s
+
 # Object files for target geryon_tests
 geryon_tests_OBJECTS = \
 "CMakeFiles/geryon_tests.dir/test_memory_region.cpp.o" \
@@ -178,7 +192,8 @@ geryon_tests_OBJECTS = \
 "CMakeFiles/geryon_tests.dir/test_interprocess.cpp.o" \
 "CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.o" \
 "CMakeFiles/geryon_tests.dir/test_synchronization.cpp.o" \
-"CMakeFiles/geryon_tests.dir/test_multi_client.cpp.o"
+"CMakeFiles/geryon_tests.dir/test_multi_client.cpp.o" \
+"CMakeFiles/geryon_tests.dir/test_consistency.cpp.o"
 
 # External object files for target geryon_tests
 geryon_tests_EXTERNAL_OBJECTS =
@@ -190,12 +205,13 @@ tests/geryon_tests: tests/CMakeFiles/geryon_tests.dir/test_interprocess.cpp.o
 tests/geryon_tests: tests/CMakeFiles/geryon_tests.dir/test_memnon_integration.cpp.o
 tests/geryon_tests: tests/CMakeFiles/geryon_tests.dir/test_synchronization.cpp.o
 tests/geryon_tests: tests/CMakeFiles/geryon_tests.dir/test_multi_client.cpp.o
+tests/geryon_tests: tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.o
 tests/geryon_tests: tests/CMakeFiles/geryon_tests.dir/build.make
 tests/geryon_tests: libgeryon.a
 tests/geryon_tests: lib/libgtest_main.a
 tests/geryon_tests: lib/libgtest.a
 tests/geryon_tests: tests/CMakeFiles/geryon_tests.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable geryon_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/zeeshanqazi/Desktop/projects/Geryon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable geryon_tests"
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/geryon_tests.dir/link.txt --verbose=$(VERBOSE)
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests && /opt/homebrew/bin/cmake -D TEST_TARGET=geryon_tests -D TEST_EXECUTABLE=/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=geryon_tests_TESTS -D CTEST_FILE=/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_DISCOVERY_EXTRA_ARGS= -D TEST_XML_OUTPUT_DIR= -P /opt/homebrew/share/cmake/Modules/GoogleTestAddTests.cmake
 

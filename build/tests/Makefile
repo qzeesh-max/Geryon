@@ -185,6 +185,30 @@ geryon_tests/fast:
 	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/build
 .PHONY : geryon_tests/fast
 
+test_consistency.o: test_consistency.cpp.o
+.PHONY : test_consistency.o
+
+# target to build an object file
+test_consistency.cpp.o:
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.o
+.PHONY : test_consistency.cpp.o
+
+test_consistency.i: test_consistency.cpp.i
+.PHONY : test_consistency.i
+
+# target to preprocess a source file
+test_consistency.cpp.i:
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.i
+.PHONY : test_consistency.cpp.i
+
+test_consistency.s: test_consistency.cpp.s
+.PHONY : test_consistency.s
+
+# target to generate assembly for a file
+test_consistency.cpp.s:
+	cd /Users/zeeshanqazi/Desktop/projects/Geryon/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/geryon_tests.dir/build.make tests/CMakeFiles/geryon_tests.dir/test_consistency.cpp.s
+.PHONY : test_consistency.cpp.s
+
 test_fault_handler.o: test_fault_handler.cpp.o
 .PHONY : test_fault_handler.o
 
@@ -367,6 +391,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... geryon_tests"
+	@echo "... test_consistency.o"
+	@echo "... test_consistency.i"
+	@echo "... test_consistency.s"
 	@echo "... test_fault_handler.o"
 	@echo "... test_fault_handler.i"
 	@echo "... test_fault_handler.s"

@@ -1,11 +1,14 @@
-MemoryRegionTest.AllocationAndPageSize 12 0.000761465
-MemoryRegionTest.ProtectionChanges 12 0.00301439
-FaultHandlerTest.SoftFaultHandling 11 0.000803504
-NetworkSyncTest.BouncingOwnership 10 0.0119952
+MemoryRegionTest.AllocationAndPageSize 13 0.000740849
+MemoryRegionTest.ProtectionChanges 13 0.00357389
+FaultHandlerTest.SoftFaultHandling 12 0.000830247
+NetworkSyncTest.BouncingOwnership 11 0.0111421
 InterprocessTest.Placeholder 3 0.00305535
-InterprocessTest.SharedVector 9 0.0132082
-NetworkSyncTest.StressTest 7 0.0173402
-MemnonIntegrationTest.SegmentedInterprocess 7 0.0182999
-SynchronizationTest.DistributedSpinLock 3 0.0609134
-MultiClientTest.StarTopologyBouncing 1 0.440402
+InterprocessTest.SharedVector 10 0.011912
+NetworkSyncTest.StressTest 8 0.0158321
+MemnonIntegrationTest.SegmentedInterprocess 8 0.0153741
+SynchronizationTest.DistributedSpinLock 4 0.0424949
+MultiClientTest.StarTopologyBouncing 2 0.219338
+ConsistencyTest.TriggerSynchronization 1 0.0675117
+ConsistencyTest.ReplicaStopFlushesData 1 2.18117
+ConsistencyTest.PrimaryStopInitiatesHandshake 1 0.0784502
 ---
