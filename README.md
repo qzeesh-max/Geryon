@@ -1,5 +1,8 @@
 # Geryon
 
+<p align="center">
+  <img src="assets/logo.jpg" alt="Geryon Framework Logo" width="300"/>
+</p>
 Geryon is a C++26 cross-platform distributed shared memory framework. It transparently orchestrates shared memory regions across multiple systems via TCP/IP sockets. By utilizing low-level virtual memory manipulation, OS-level page fault handling, and seamless network synchronization, Geryon allows disparate nodes to access and modify a unified memory space as if they were sharing a local physical memory segment.
 
 Geryon supports integration with existing memory mapping and interprocess communication libraries, including `boost::interprocess` and the [Memnon](https://github.com/qzeesh-max/Memnon) allocator, effectively transforming local interprocess communication into distributed cluster-wide communication.
