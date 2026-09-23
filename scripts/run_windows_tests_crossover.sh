@@ -1,30 +1,36 @@
 #!/bin/bash
+# Geryon - A Distributed Shared Memory Framework
+# Copyright (C) 2026 Zeeshan Qazi
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Run the Windows test suite using CrossOver on macOS.
+# Builds the Windows executable first if it doesn't exist.
+#
+# Usage: ./scripts/run_windows_tests_crossover.sh ["<BottleName>"] [extra-gtest-args...]
+# Example: ./scripts/run_windows_tests_crossover.sh "Windows 10"
+# Example: ./scripts/run_windows_tests_crossover.sh "Windows 10" --gtest_filter=NetworkSyncTest.*
 set -e
 
-BOTTLE_NAME="$1"
+cd "$(dirname "$0")/.."
 
-if [ -z "$BOTTLE_NAME" ]; then
-    echo "Usage: ./run_windows_tests_crossover.sh \"<BottleName>\""
-    echo "Example: ./run_windows_tests_crossover.sh \"Windows 10\""
-    exit 1
-fi
+BOTTLE_NAME="${1:-Windows 10}"
+shift || true   # Consume the bottle name; remaining args passed to the test binary
 
-CROSSOVER_CMD="/Applications/CrossOver.app/Contents/SharedSupport/CrossOver/bin/wine"
+CROSSOVER_WINE="/Applications/CrossOver.app/Contents/SharedSupport/CrossOver/bin/wine"
 
-if [ ! -f "$CROSSOVER_CMD" ]; then
-    echo "CrossOver wine executable could not be found."
+if [ ! -f "$CROSSOVER_WINE" ]; then
+    echo "Error: CrossOver wine executable not found at:"
+    echo "  $CROSSOVER_WINE"
     echo "Please ensure CrossOver is installed in /Applications/CrossOver.app"
     exit 1
 fi
 
-EXE_PATH="${2:-$(pwd)/build-windows/tests/geryon_tests.exe}"
+EXE_PATH="$(pwd)/build-windows/tests/geryon_tests.exe"
 
 if [ ! -f "$EXE_PATH" ]; then
-    echo "Executable not found at $EXE_PATH"
-    echo "Please run ./scripts/build_windows_on_mac.sh first."
-    exit 1
+    echo "Windows executable not found. Building first..."
+    ./scripts/build_windows_on_mac.sh
 fi
 
-shift 2
-echo "Running Windows executable using CrossOver in bottle: $BOTTLE_NAME"
-"$CROSSOVER_CMD" --bottle "$BOTTLE_NAME" "$EXE_PATH" "$@"
+echo "Running Windows test suite via CrossOver (bottle: '$BOTTLE_NAME')..."
+"$CROSSOVER_WINE" --bottle "$BOTTLE_NAME" --cx-app "$EXE_PATH" "$@"

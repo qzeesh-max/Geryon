@@ -114,9 +114,12 @@ private:
     // Fault handling sync (Both Primary and Replica)
     std::mutex wait_mutex_;
     std::condition_variable wait_cv_;
-    // Single-page wait variables (DEPRECATED, replace with vectors)
     std::vector<bool> page_received_;
     std::vector<bool> page_request_in_flight_;
+    // True while the page is currently mapped ReadWrite at this node.
+    // Set to true when access is granted, false when page is sent away.
+    // Guarded by wait_mutex_ so concurrent faulting threads can fast-path.
+    std::vector<bool> page_accessible_;
     
     // Page ownership tracking
     // For Replica: true if it owns the page

@@ -1,0 +1,163 @@
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineSystem.cmake:12 (find_program)"
+      - "CMakeLists.txt:16 (project)"
+    mode: "program"
+    variable: "CMAKE_UNAME"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "uname"
+    candidate_directories:
+      - "/Users/zeeshanqazi/.gemini/antigravity-ide/bin/"
+      - "/Users/zeeshanqazi/.opencode/bin/"
+      - "/opt/homebrew/opt/openjdk@21/bin/"
+      - "/Users/zeeshanqazi/.antigravity-ide/antigravity-ide/bin/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/upstream/emscripten/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/node/22.16.0_64bit/bin/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/python/3.13.3_64bit/bin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/opt/homebrew/bin/"
+      - "/Users/zeeshanqazi/.local/bin/"
+    searched_directories:
+      - "/Users/zeeshanqazi/.gemini/antigravity-ide/bin/uname"
+      - "/Users/zeeshanqazi/.opencode/bin/uname"
+      - "/opt/homebrew/opt/openjdk@21/bin/uname"
+      - "/Users/zeeshanqazi/.antigravity-ide/antigravity-ide/bin/uname"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/uname"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/upstream/emscripten/uname"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/node/22.16.0_64bit/bin/uname"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/python/3.13.3_64bit/bin/uname"
+      - "/usr/local/bin/uname"
+      - "/System/Cryptexes/App/usr/bin/uname"
+    found: "/usr/bin/uname"
+    search_context:
+      ENV{PATH}:
+        - "/Users/zeeshanqazi/.gemini/antigravity-ide/bin"
+        - "/Users/zeeshanqazi/.opencode/bin"
+        - "/opt/homebrew/opt/openjdk@21/bin"
+        - "/Users/zeeshanqazi/.antigravity-ide/antigravity-ide/bin"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/upstream/emscripten"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/node/22.16.0_64bit/bin"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/python/3.13.3_64bit/bin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/opt/homebrew/bin"
+        - "/Users/zeeshanqazi/.local/bin"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/CMakeDetermineSystem.cmake:212 (message)"
+      - "CMakeLists.txt:16 (project)"
+    message: |
+      The system is: Darwin - 27.0.0 - arm64
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/homebrew/share/cmake/Modules/Platform/Darwin.cmake:66 (find_program)"
+      - "/opt/homebrew/share/cmake/Modules/CMakeSystemSpecificInformation.cmake:32 (include)"
+      - "CMakeLists.txt:16 (project)"
+    mode: "program"
+    variable: "CMAKE_INSTALL_NAME_TOOL"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "install_name_tool"
+    candidate_directories:
+      - "/Users/zeeshanqazi/.gemini/antigravity-ide/bin/"
+      - "/Users/zeeshanqazi/.opencode/bin/"
+      - "/opt/homebrew/opt/openjdk@21/bin/"
+      - "/Users/zeeshanqazi/.antigravity-ide/antigravity-ide/bin/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/upstream/emscripten/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/node/22.16.0_64bit/bin/"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/python/3.13.3_64bit/bin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+      - "/Library/Apple/usr/bin/"
+      - "/opt/homebrew/bin/"
+      - "/Users/zeeshanqazi/.local/bin/"
+    searched_directories:
+      - "/Users/zeeshanqazi/.gemini/antigravity-ide/bin/install_name_tool"
+      - "/Users/zeeshanqazi/.opencode/bin/install_name_tool"
+      - "/opt/homebrew/opt/openjdk@21/bin/install_name_tool"
+      - "/Users/zeeshanqazi/.antigravity-ide/antigravity-ide/bin/install_name_tool"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/install_name_tool"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/upstream/emscripten/install_name_tool"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/node/22.16.0_64bit/bin/install_name_tool"
+      - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/python/3.13.3_64bit/bin/install_name_tool"
+      - "/usr/local/bin/install_name_tool"
+      - "/System/Cryptexes/App/usr/bin/install_name_tool"
+    found: "/usr/bin/install_name_tool"
+    search_context:
+      ENV{PATH}:
+        - "/Users/zeeshanqazi/.gemini/antigravity-ide/bin"
+        - "/Users/zeeshanqazi/.opencode/bin"
+        - "/opt/homebrew/opt/openjdk@21/bin"
+        - "/Users/zeeshanqazi/.antigravity-ide/antigravity-ide/bin"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/upstream/emscripten"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/node/22.16.0_64bit/bin"
+        - "/Users/zeeshanqazi/.gemini/antigravity/scratch/wasm-terminal/emsdk/python/3.13.3_64bit/bin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+        - "/Library/Apple/usr/bin"
+        - "/opt/homebrew/bin"
+        - "/Users/zeeshanqazi/.local/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+...

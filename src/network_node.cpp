@@ -35,9 +35,13 @@ NetworkNode::NetworkNode(MemoryRegion* region, bool initial_owner)
     if (is_primary_) {
         primary_page_owner_.resize(num_pages, 0); // 0 = Primary owns it
         primary_page_waiters_.resize(num_pages);
+        // Primary starts with all pages accessible.
+        page_accessible_.resize(num_pages, true);
     } else {
         replica_page_owned_.resize(num_pages, false);
         replica_read_buffer_.resize(MemoryRegion::system_page_size());
+        // Replica starts with no pages accessible.
+        page_accessible_.resize(num_pages, false);
     }
     page_received_.resize(num_pages, false);
     page_request_in_flight_.resize(num_pages, false);
@@ -222,6 +226,7 @@ void NetworkNode::handle_replica_read_data(const boost::system::error_code& erro
         std::lock_guard<std::mutex> lock(wait_mutex_);
         page_received_[page_index] = true;
         page_request_in_flight_[page_index] = false;
+        page_accessible_[page_index] = true;
         wait_cv_.notify_all();
     }
 
@@ -323,6 +328,7 @@ void NetworkNode::handle_primary_read_data(uint32_t client_id, const boost::syst
             std::lock_guard<std::mutex> lock(wait_mutex_);
             page_received_[page_index] = true;
             page_request_in_flight_[page_index] = false;
+            page_accessible_[page_index] = true;
             wait_cv_.notify_all();
         }
         
@@ -384,33 +390,42 @@ bool NetworkNode::request_page(void* fault_address) {
     uint32_t page_index = (addr - base) / page_size;
 
     std::unique_lock<std::mutex> lock(wait_mutex_);
-    
+
     while (true) {
+        // Fast-path: another thread already made the page accessible for us.
+        // This handles the case where two threads fault on the same page simultaneously
+        // (common on macOS with SA_SIGINFO signal delivery).
+        if (page_accessible_[page_index]) {
+            region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
+            return true;
+        }
+
+        // Slow-path: page is not accessible; verify ownership and request if needed.
         bool owned = false;
         {
             std::lock_guard<std::mutex> own_lock(ownership_mutex_);
             if (is_primary_) {
-                if (primary_page_owner_[page_index] == 0) owned = true;
+                owned = (primary_page_owner_[page_index] == 0);
             } else {
-                if (replica_page_owned_[page_index]) owned = true;
-            }
-        }
-        
-        if (owned) {
-            region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
-            break;
-        }
-        
-        bool in_flight = false;
-        {
-            std::lock_guard<std::mutex> own_lock(ownership_mutex_);
-            in_flight = page_request_in_flight_[page_index];
-            if (!in_flight) {
-                page_request_in_flight_[page_index] = true;
+                owned = replica_page_owned_[page_index];
             }
         }
 
+        if (owned) {
+            // We own the page but it's not yet marked accessible — make it so.
+            region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
+            page_accessible_[page_index] = true;
+            wait_cv_.notify_all(); // Wake any other threads waiting on this page.
+            return true;
+        }
+
+        // Issue a request if none is in flight yet.
+        bool in_flight = page_request_in_flight_[page_index];
         if (!in_flight) {
+            page_request_in_flight_[page_index] = true;
+            // Release wait_mutex_ before sending to avoid potential deadlocks
+            // (send_page_request acquires ownership_mutex_ internally).
+            lock.unlock();
             if (!is_primary_) {
                 send_page_request(0, page_index);
             } else {
@@ -422,12 +437,11 @@ bool NetworkNode::request_page(void* fault_address) {
                 }
                 send_page_request(current_owner, page_index);
             }
+            lock.lock();
         }
-        
+
         wait_cv_.wait(lock);
     }
-    
-    return true;
 }
 
 // --------------------------------------------------------------------------------------
@@ -467,7 +481,12 @@ void NetworkNode::send_page_data(uint32_t target_node_id, uint32_t page_index) {
         // REPLICA LOGIC: send to Primary
         std::lock_guard<std::mutex> write_lock(replica_socket_write_mutex_);
 
-        // Ownership has already been relinquished by the caller
+        // Ownership has already been relinquished by the caller.
+        // Mark page as inaccessible so any concurrent faulting thread re-waits.
+        {
+            std::lock_guard<std::mutex> lock(wait_mutex_);
+            page_accessible_[page_index] = false;
+        }
 
         void* io_base = static_cast<char*>(region_->io_address()) + (page_index * page_size);
 
@@ -488,18 +507,19 @@ void NetworkNode::send_page_data(uint32_t target_node_id, uint32_t page_index) {
 
             {
                 std::lock_guard<std::mutex> lock(ownership_mutex_);
-                // Since Primary is sending from its own faulting or queue logic, update ownership
-                // Wait, Primary ONLY calls send_page_data when IT owned the page initially (or just received it).
-                // Actually, primary_page_owner_ is already updated by handle_primary_read_data before forwarding!
-                // Wait, if Primary owned it and a Replica requested it:
-                // handle_primary_read_header -> send_page_data.
-                // We need to pop the waiter and set the owner!
+                // Update ownership: pop the waiter and mark owner as the target.
                 if (!primary_page_waiters_[page_index].empty() && primary_page_waiters_[page_index].front() == target_node_id) {
                     primary_page_owner_[page_index] = primary_page_waiters_[page_index].front();
                     primary_page_waiters_[page_index].pop();
                 } else if (primary_page_owner_[page_index] == 0) {
                      primary_page_owner_[page_index] = target_node_id;
                 }
+            }
+
+            // Mark page as inaccessible so any concurrent faulting thread re-waits.
+            {
+                std::lock_guard<std::mutex> lock(wait_mutex_);
+                page_accessible_[page_index] = false;
             }
 
             void* io_base = static_cast<char*>(region_->io_address()) + (page_index * page_size);

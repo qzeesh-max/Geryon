@@ -1,0 +1,429 @@
+Start testing: Sep 23 00:32 EDT
+----------------------------------------------------------
+1/14 Testing: MemoryRegionTest.AllocationAndPageSize
+1/14 Test: MemoryRegionTest.AllocationAndPageSize
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=MemoryRegionTest.AllocationAndPageSize" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"MemoryRegionTest.AllocationAndPageSize" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = MemoryRegionTest.AllocationAndPageSize
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MemoryRegionTest
+[ RUN      ] MemoryRegionTest.AllocationAndPageSize
+[       OK ] MemoryRegionTest.AllocationAndPageSize (0 ms)
+[----------] 1 test from MemoryRegionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"MemoryRegionTest.AllocationAndPageSize" end time: Sep 23 00:32 EDT
+"MemoryRegionTest.AllocationAndPageSize" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/14 Testing: MemoryRegionTest.ProtectionChanges
+2/14 Test: MemoryRegionTest.ProtectionChanges
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=MemoryRegionTest.ProtectionChanges" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"MemoryRegionTest.ProtectionChanges" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = MemoryRegionTest.ProtectionChanges
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MemoryRegionTest
+[ RUN      ] MemoryRegionTest.ProtectionChanges
+[       OK ] MemoryRegionTest.ProtectionChanges (29 ms)
+[----------] 1 test from MemoryRegionTest (29 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (29 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"MemoryRegionTest.ProtectionChanges" end time: Sep 23 00:32 EDT
+"MemoryRegionTest.ProtectionChanges" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/14 Testing: FaultHandlerTest.SoftFaultHandling
+3/14 Test: FaultHandlerTest.SoftFaultHandling
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=FaultHandlerTest.SoftFaultHandling" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"FaultHandlerTest.SoftFaultHandling" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = FaultHandlerTest.SoftFaultHandling
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FaultHandlerTest
+[ RUN      ] FaultHandlerTest.SoftFaultHandling
+[       OK ] FaultHandlerTest.SoftFaultHandling (0 ms)
+[----------] 1 test from FaultHandlerTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"FaultHandlerTest.SoftFaultHandling" end time: Sep 23 00:32 EDT
+"FaultHandlerTest.SoftFaultHandling" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/14 Testing: NetworkSyncTest.BouncingOwnership
+4/14 Test: NetworkSyncTest.BouncingOwnership
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=NetworkSyncTest.BouncingOwnership" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"NetworkSyncTest.BouncingOwnership" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = NetworkSyncTest.BouncingOwnership
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from NetworkSyncTest
+[ RUN      ] NetworkSyncTest.BouncingOwnership
+Replica 1 connected.
+[       OK ] NetworkSyncTest.BouncingOwnership (110 ms)
+[----------] 1 test from NetworkSyncTest (110 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (110 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"NetworkSyncTest.BouncingOwnership" end time: Sep 23 00:32 EDT
+"NetworkSyncTest.BouncingOwnership" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/14 Testing: NetworkSyncTest.StressTest
+5/14 Test: NetworkSyncTest.StressTest
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=NetworkSyncTest.StressTest" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"NetworkSyncTest.StressTest" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = NetworkSyncTest.StressTest
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from NetworkSyncTest
+[ RUN      ] NetworkSyncTest.StressTest
+Replica 1 connected.
+[       OK ] NetworkSyncTest.StressTest (111 ms)
+[----------] 1 test from NetworkSyncTest (111 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (111 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"NetworkSyncTest.StressTest" end time: Sep 23 00:32 EDT
+"NetworkSyncTest.StressTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/14 Testing: MultiClientTest.StarTopologyBouncing
+6/14 Test: MultiClientTest.StarTopologyBouncing
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=MultiClientTest.StarTopologyBouncing" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"MultiClientTest.StarTopologyBouncing" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = MultiClientTest.StarTopologyBouncing
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MultiClientTest
+[ RUN      ] MultiClientTest.StarTopologyBouncing
+Replica 1 connected.
+Replica 2 connected.
+Replica 3 connected.
+[       OK ] MultiClientTest.StarTopologyBouncing (414 ms)
+[----------] 1 test from MultiClientTest (414 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (414 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"MultiClientTest.StarTopologyBouncing" end time: Sep 23 00:32 EDT
+"MultiClientTest.StarTopologyBouncing" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/14 Testing: SynchronizationTest.DistributedSpinLock
+7/14 Test: SynchronizationTest.DistributedSpinLock
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=SynchronizationTest.DistributedSpinLock" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"SynchronizationTest.DistributedSpinLock" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = SynchronizationTest.DistributedSpinLock
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from SynchronizationTest
+[ RUN      ] SynchronizationTest.DistributedSpinLock
+Replica 1 connected.
+Primary finished.
+Replica finished.
+[       OK ] SynchronizationTest.DistributedSpinLock (162 ms)
+[----------] 1 test from SynchronizationTest (162 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (162 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Passed.
+"SynchronizationTest.DistributedSpinLock" end time: Sep 23 00:32 EDT
+"SynchronizationTest.DistributedSpinLock" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/14 Testing: InterprocessTest.SharedVector
+8/14 Test: InterprocessTest.SharedVector
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=InterprocessTest.SharedVector" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"InterprocessTest.SharedVector" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = InterprocessTest.SharedVector
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from InterprocessTest
+[ RUN      ] InterprocessTest.SharedVector
+Replica 1 connected.
+[       OK ] InterprocessTest.SharedVector (111 ms)
+[----------] 1 test from InterprocessTest (111 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (111 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"InterprocessTest.SharedVector" end time: Sep 23 00:32 EDT
+"InterprocessTest.SharedVector" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/14 Testing: MemnonIntegrationTest.SegmentedInterprocess
+9/14 Test: MemnonIntegrationTest.SegmentedInterprocess
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=MemnonIntegrationTest.SegmentedInterprocess" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"MemnonIntegrationTest.SegmentedInterprocess" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = MemnonIntegrationTest.SegmentedInterprocess
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MemnonIntegrationTest
+[ RUN      ] MemnonIntegrationTest.SegmentedInterprocess
+Replica 1 connected.
+[       OK ] MemnonIntegrationTest.SegmentedInterprocess (111 ms)
+[----------] 1 test from MemnonIntegrationTest (111 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (111 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"MemnonIntegrationTest.SegmentedInterprocess" end time: Sep 23 00:32 EDT
+"MemnonIntegrationTest.SegmentedInterprocess" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/14 Testing: ConsistencyTest.TriggerSynchronization
+10/14 Test: ConsistencyTest.TriggerSynchronization
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=ConsistencyTest.TriggerSynchronization" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"ConsistencyTest.TriggerSynchronization" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = ConsistencyTest.TriggerSynchronization
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ConsistencyTest
+[ RUN      ] ConsistencyTest.TriggerSynchronization
+Starting primary...
+Primary started.
+Starting replica...
+Replica 1 connected.
+Replica started.
+Simulating replica page request 1
+Simulating replica page request 2
+Replica writing to pages
+Primary triggering synchronization
+Primary checking consistency
+Stopping nodes
+Test complete
+[       OK ] ConsistencyTest.TriggerSynchronization (2056 ms)
+[----------] 1 test from ConsistencyTest (2056 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2056 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   2.08 sec
+----------------------------------------------------------
+Test Passed.
+"ConsistencyTest.TriggerSynchronization" end time: Sep 23 00:32 EDT
+"ConsistencyTest.TriggerSynchronization" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/14 Testing: ConsistencyTest.ReplicaStopFlushesData
+11/14 Test: ConsistencyTest.ReplicaStopFlushesData
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=ConsistencyTest.ReplicaStopFlushesData" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"ConsistencyTest.ReplicaStopFlushesData" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = ConsistencyTest.ReplicaStopFlushesData
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ConsistencyTest
+[ RUN      ] ConsistencyTest.ReplicaStopFlushesData
+Replica 1 connected.
+[       OK ] ConsistencyTest.ReplicaStopFlushesData (2165 ms)
+[----------] 1 test from ConsistencyTest (2165 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2165 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   2.18 sec
+----------------------------------------------------------
+Test Passed.
+"ConsistencyTest.ReplicaStopFlushesData" end time: Sep 23 00:32 EDT
+"ConsistencyTest.ReplicaStopFlushesData" time elapsed: 00:00:02
+----------------------------------------------------------
+
+12/14 Testing: ConsistencyTest.PrimaryStopInitiatesHandshake
+12/14 Test: ConsistencyTest.PrimaryStopInitiatesHandshake
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=ConsistencyTest.PrimaryStopInitiatesHandshake" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"ConsistencyTest.PrimaryStopInitiatesHandshake" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = ConsistencyTest.PrimaryStopInitiatesHandshake
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ConsistencyTest
+[ RUN      ] ConsistencyTest.PrimaryStopInitiatesHandshake
+Replica 1 connected.
+[       OK ] ConsistencyTest.PrimaryStopInitiatesHandshake (55 ms)
+[----------] 1 test from ConsistencyTest (55 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (55 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"ConsistencyTest.PrimaryStopInitiatesHandshake" end time: Sep 23 00:32 EDT
+"ConsistencyTest.PrimaryStopInitiatesHandshake" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/14 Testing: CorrectnessTest.MultithreadMultipageCorrectness
+13/14 Test: CorrectnessTest.MultithreadMultipageCorrectness
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=CorrectnessTest.MultithreadMultipageCorrectness" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"CorrectnessTest.MultithreadMultipageCorrectness" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = CorrectnessTest.MultithreadMultipageCorrectness
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultithreadMultipageCorrectness
+Replica 1 connected.
+Replica 2 connected.
+Replica 3 connected.
+[       OK ] CorrectnessTest.MultithreadMultipageCorrectness (2406 ms)
+[----------] 1 test from CorrectnessTest (2406 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2406 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   2.42 sec
+----------------------------------------------------------
+Test Passed.
+"CorrectnessTest.MultithreadMultipageCorrectness" end time: Sep 23 00:32 EDT
+"CorrectnessTest.MultithreadMultipageCorrectness" time elapsed: 00:00:02
+----------------------------------------------------------
+
+14/14 Testing: CorrectnessTest.MultiprocessMultipageCorrectness
+14/14 Test: CorrectnessTest.MultiprocessMultipageCorrectness
+Command: "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests" "--gtest_filter=CorrectnessTest.MultiprocessMultipageCorrectness" "--gtest_also_run_disabled_tests"
+Directory: /Users/zeeshanqazi/Desktop/projects/Geryon/build/tests
+"CorrectnessTest.MultiprocessMultipageCorrectness" start time: Sep 23 00:32 EDT
+Output:
+----------------------------------------------------------
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = CorrectnessTest.MultiprocessMultipageCorrectness
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = CorrectnessTest.MultiprocessMultipageCorrectness
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+Replica 1 connected.
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = CorrectnessTest.MultiprocessMultipageCorrectness
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+Replica 2 connected.
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = CorrectnessTest.MultiprocessMultipageCorrectness
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+Replica 3 connected.
+[       OK ] CorrectnessTest.MultiprocessMultipageCorrectness (2165 ms)
+[----------] 1 test from CorrectnessTest (2165 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2165 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   2.19 sec
+----------------------------------------------------------
+Test Passed.
+"CorrectnessTest.MultiprocessMultipageCorrectness" end time: Sep 23 00:32 EDT
+"CorrectnessTest.MultiprocessMultipageCorrectness" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Sep 23 00:32 EDT

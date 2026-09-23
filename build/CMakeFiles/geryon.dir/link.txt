@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgeryon.a CMakeFiles/geryon.dir/src/memory_region.cpp.o CMakeFiles/geryon.dir/src/fault_handler.cpp.o CMakeFiles/geryon.dir/src/network_node.cpp.o
+/usr/bin/ranlib libgeryon.a

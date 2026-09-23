@@ -1,0 +1,1 @@
+/opt/homebrew/bin/g++-16 -O3 -DNDEBUG -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/benchmark_page_transfer.dir/benchmark_page_transfer.cpp.o -o benchmark_page_transfer  ../libgeryon.a ../_deps/benchmark-build/src/libbenchmark.a ../_deps/benchmark-build/src/libbenchmark_main.a -lpthread ../_deps/benchmark-build/src/libbenchmark.a
