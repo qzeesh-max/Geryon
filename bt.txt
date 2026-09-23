@@ -1,0 +1,49 @@
+(lldb) process attach --pid 12606
+Process 12606 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+    frame #0: 0x000000019fde2af4 libsystem_kernel.dylib`__ulock_wait + 8
+libsystem_kernel.dylib`__ulock_wait:
+->  0x19fde2af4 <+8>:  b.lo   0x19fde2b14               ; <+40>
+    0x19fde2af8 <+12>: pacibsp 
+    0x19fde2afc <+16>: stp    x29, x30, [sp, #-0x10]!
+    0x19fde2b00 <+20>: mov    x29, sp
+Target 0: (geryon_tests) stopped.
+Executable binary set to "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests".
+Architecture set to: arm64-apple-macosx-.
+(lldb) bt all
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+  * frame #0: 0x000000019fde2af4 libsystem_kernel.dylib`__ulock_wait + 8
+    frame #1: 0x000000019fe2803c libsystem_pthread.dylib`_pthread_join + 620
+    frame #2: 0x00000001033bb8ac libstdc++.6.dylib`std::thread::join() + 32
+    frame #3: 0x0000000102e7b210 geryon_tests`SynchronizationTest_DistributedSpinLock_Test::TestBody() + 688
+    frame #4: 0x0000000102eccfa4 geryon_tests`void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) + 68
+    frame #5: 0x0000000102ecd2d8 geryon_tests`testing::Test::Run() (.part.0) + 424
+    frame #6: 0x0000000102ecda7c geryon_tests`testing::TestInfo::Run() + 920
+    frame #7: 0x0000000102ecf688 geryon_tests`testing::TestSuite::Run() (.part.0) + 456
+    frame #8: 0x0000000102ed5014 geryon_tests`testing::internal::UnitTestImpl::RunAllTests() + 1268
+    frame #9: 0x0000000102ed5c08 geryon_tests`testing::UnitTest::Run() + 104
+    frame #10: 0x0000000102ed7ec0 geryon_tests`main + 64
+    frame #11: 0x000000019fa4fe80 dyld`start + 6688
+  thread #2
+    frame #0: 0x000000019fde6fcc libsystem_kernel.dylib`kevent + 8
+    frame #1: 0x0000000102e80510 geryon_tests`boost::asio::detail::kqueue_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) + 112
+    frame #2: 0x0000000102e89124 geryon_tests`boost::asio::detail::scheduler::run(boost::system::error_code&) (.isra.0) + 316
+    frame #3: 0x0000000102e897e8 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_primary(unsigned short)::'lambda'()>>>::_M_run() + 36
+    frame #4: 0x00000001033bb83c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #5: 0x000000019fe25d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #3
+    frame #0: 0x000000019fde6fcc libsystem_kernel.dylib`kevent + 8
+    frame #1: 0x0000000102e80510 geryon_tests`boost::asio::detail::kqueue_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) + 112
+    frame #2: 0x0000000102e89124 geryon_tests`boost::asio::detail::scheduler::run(boost::system::error_code&) (.isra.0) + 316
+    frame #3: 0x0000000102e899ec geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_replica(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, unsigned short)::'lambda'()>>>::_M_run() + 36
+    frame #4: 0x00000001033bb83c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #5: 0x000000019fe25d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #4
+    frame #0: 0x000000019fde450c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000019fe261d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x0000000102e85580 geryon_tests`geryon::NetworkNode::request_page(void*) + 224
+    frame #3: 0x0000000102e7c97c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000019fe30144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x0000000102e7abf8 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<SynchronizationTest_DistributedSpinLock_Test::TestBody()::'lambda0'()>>>::_M_run() + 88
+    frame #6: 0x00000001033bb83c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000019fe25d00 libsystem_pthread.dylib`_pthread_start + 136

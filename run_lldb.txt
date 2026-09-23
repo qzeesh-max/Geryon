@@ -1,0 +1,6 @@
+process handle SIGSEGV -n true -p true -s false
+process handle SIGBUS -n true -p true -s false
+run --gtest_filter=SynchronizationTest.DistributedSpinLock
+process interrupt
+bt all
+quit

@@ -1,0 +1,93 @@
+{
+  "tests": 9,
+  "name": "AllTests",
+  "testsuites": [
+    {
+      "name": "MemoryRegionTest",
+      "tests": 2,
+      "testsuite": [
+        {
+          "name": "AllocationAndPageSize",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_memory_region.cpp",
+          "line": 6
+        },
+        {
+          "name": "ProtectionChanges",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_memory_region.cpp",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "name": "FaultHandlerTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "SoftFaultHandling",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_fault_handler.cpp",
+          "line": 7
+        }
+      ]
+    },
+    {
+      "name": "NetworkSyncTest",
+      "tests": 2,
+      "testsuite": [
+        {
+          "name": "BouncingOwnership",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_network_sync.cpp",
+          "line": 10
+        },
+        {
+          "name": "StressTest",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_network_sync.cpp",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "name": "InterprocessTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "SharedVector",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_interprocess.cpp",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "name": "MemnonIntegrationTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "SegmentedInterprocess",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_memnon_integration.cpp",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "name": "SynchronizationTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "DistributedSpinLock",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_synchronization.cpp",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "name": "MultiClientTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "StarTopologyBouncing",
+          "file": "\/Users\/zeeshanqazi\/Desktop\/projects\/Geryon\/tests\/test_multi_client.cpp",
+          "line": 17
+        }
+      ]
+    }
+  ]
+}

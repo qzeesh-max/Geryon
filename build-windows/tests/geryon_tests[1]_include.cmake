@@ -1,0 +1,5 @@
+if(EXISTS "/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests/geryon_tests[1]_tests.cmake")
+  include("/Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/tests/geryon_tests[1]_tests.cmake")
+else()
+  add_test(geryon_tests_NOT_BUILT geryon_tests_NOT_BUILT)
+endif()

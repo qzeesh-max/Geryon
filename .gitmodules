@@ -1,0 +1,3 @@
+[submodule "external/Memnon"]
+	path = external/Memnon
+	url = https://github.com/qzeesh-max/Memnon

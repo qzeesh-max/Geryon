@@ -1,0 +1,3 @@
+/opt/homebrew/bin/cmake -E rm -f CMakeFiles/geryon_tests.dir/objects.a
+/opt/homebrew/bin/x86_64-w64-mingw32-ar qc CMakeFiles/geryon_tests.dir/objects.a @CMakeFiles/geryon_tests.dir/objects1.rsp
+/opt/homebrew/bin/x86_64-w64-mingw32-g++ -O3 -DNDEBUG -static -lws2_32 -lwsock32 -Wl,--whole-archive CMakeFiles/geryon_tests.dir/objects.a -Wl,--no-whole-archive -o geryon_tests.exe -Wl,--out-implib,libgeryon_tests.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/geryon_tests.dir/linkLibs.rsp
