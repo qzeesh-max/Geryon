@@ -55,7 +55,11 @@ void NetworkNode::start_primary(uint16_t port) {
     if (!is_primary_) throw std::runtime_error("Cannot start replica as primary");
     
     boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
-    acceptor_ = std::make_unique<boost::asio::ip::tcp::acceptor>(io_context_, endpoint);
+    acceptor_ = std::make_unique<boost::asio::ip::tcp::acceptor>(io_context_);
+    acceptor_->open(endpoint.protocol());
+    acceptor_->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+    acceptor_->bind(endpoint);
+    acceptor_->listen();
     
     accept_connection();
     
@@ -94,8 +98,11 @@ void NetworkNode::stop() {
 
     if (is_primary_) {
         std::vector<uint32_t> client_ids;
-        for (const auto& [id, _] : clients_) {
-            client_ids.push_back(id);
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex_);
+            for (const auto& pair : clients_) {
+                client_ids.push_back(pair.first);
+            }
         }
         
         if (!client_ids.empty()) {
@@ -111,22 +118,49 @@ void NetworkNode::stop() {
         }
     } else {
         trigger_synchronization();
+        
+        // Wait for primary to acknowledge all data before closing
+        // to prevent TCP RST on exit which can drop unread buffers
+        pending_sync_responses_ = 1;
+        boost::asio::post(io_context_, [this]() {
+            send_sync_request(0);
+        });
+        
+        std::unique_lock<std::mutex> lock(wait_mutex_);
+        sync_cv_.wait_for(lock, std::chrono::seconds(2), [this]() {
+            return pending_sync_responses_ <= 0;
+        });
+
         if (replica_socket_ && replica_socket_->is_open()) {
             send_sync_response(0);
         }
-    }
 
-    io_context_.stop();
-    if (replica_socket_ && replica_socket_->is_open()) {
-        boost::system::error_code ec;
-        replica_socket_->close(ec);
-    }
-    for (auto& [id, socket] : clients_) {
-        if (socket && socket->is_open()) {
+        io_context_.stop();
+        if (io_thread_.joinable()) {
+            io_thread_.join();
+        }
+
+        if (replica_socket_ && replica_socket_->is_open()) {
             boost::system::error_code ec;
-            socket->close(ec);
+            replica_socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+            replica_socket_->close(ec);
         }
     }
+
+    if (is_primary_) {
+        io_context_.stop();
+        if (io_thread_.joinable()) {
+            io_thread_.join();
+        }
+        
+        for (auto& [id, socket] : clients_) {
+            if (socket && socket->is_open()) {
+                boost::system::error_code ec;
+                socket->close(ec);
+            }
+        }
+    }
+
     if (acceptor_ && acceptor_->is_open()) {
         boost::system::error_code ec;
         acceptor_->close(ec);
@@ -141,8 +175,11 @@ void NetworkNode::accept_connection() {
     acceptor_->async_accept(*new_socket, [this, new_socket](const boost::system::error_code& error) {
         if (!error) {
             uint32_t client_id = next_client_id_++;
-            clients_[client_id] = new_socket;
-            client_write_mutexes_[client_id] = std::make_unique<std::mutex>();
+            {
+                std::lock_guard<std::mutex> lock(clients_mutex_);
+                clients_[client_id] = new_socket;
+                client_write_mutexes_[client_id] = std::make_unique<std::mutex>();
+            }
             primary_read_buffers_[client_id].resize(MemoryRegion::system_page_size());
             
             std::cout << "Replica " << client_id << " connected." << std::endl;
@@ -168,8 +205,12 @@ void NetworkNode::start_replica_read_loop() {
 
 void NetworkNode::handle_replica_read_header(const boost::system::error_code& error, std::size_t) {
     if (error) {
-        if (error != boost::asio::error::operation_aborted && error != boost::asio::error::eof) {
+        if (error != boost::asio::error::operation_aborted && error != boost::asio::error::eof && error != boost::asio::error::connection_reset) {
             std::cerr << "Replica read header failed: " << error.message() << std::endl;
+        }
+        if (replica_socket_ && replica_socket_->is_open()) {
+            boost::system::error_code ec;
+            replica_socket_->close(ec);
         }
         return;
     }
@@ -188,6 +229,7 @@ void NetworkNode::handle_replica_read_header(const boost::system::error_code& er
 
         if (should_send) {
             // Give up ownership and send to Primary
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
             send_page_data(0, page_index);
         }
         start_replica_read_loop();
@@ -196,6 +238,11 @@ void NetworkNode::handle_replica_read_header(const boost::system::error_code& er
         send_sync_response(0);
         start_replica_read_loop();
     } else if (replica_read_header_.type == MsgType::SyncResponse) {
+        pending_sync_responses_--;
+        if (pending_sync_responses_ <= 0) {
+            std::lock_guard<std::mutex> lock(wait_mutex_);
+            sync_cv_.notify_all();
+        }
         start_replica_read_loop();
     } else if (replica_read_header_.type == MsgType::PageData) {
         boost::asio::async_read(*replica_socket_,
@@ -216,10 +263,36 @@ void NetworkNode::handle_replica_read_data(const boost::system::error_code& erro
 
     std::memcpy(io_base, replica_read_buffer_.data(), page_size);
     region_->set_protection(page_base, page_size, PageProtection::ReadWrite);
-    
+
+    bool should_bounce = false;
     {
         std::lock_guard<std::mutex> lock(ownership_mutex_);
-        replica_page_owned_[page_index] = true;
+        if (is_stopping_) {
+            should_bounce = true;
+        } else {
+            replica_page_owned_[page_index] = true;
+        }
+    }
+
+    if (should_bounce) {
+        // Bounce the page back to the primary so it isn't lost when we exit
+        auto header = std::make_shared<MsgHeader>();
+        header->type = MsgType::PageData;
+        header->page_index = htonl(page_index);
+        
+        auto data_buffer = std::make_shared<std::vector<uint8_t>>(replica_read_buffer_);
+        
+        std::array<boost::asio::const_buffer, 2> buffers = {
+            boost::asio::buffer(header.get(), sizeof(MsgHeader)),
+            boost::asio::buffer(data_buffer->data(), data_buffer->size())
+        };
+        
+        boost::system::error_code ec;
+        std::lock_guard<std::mutex> write_lock(replica_socket_write_mutex_);
+        boost::asio::write(*replica_socket_, buffers, ec);
+        
+        start_replica_read_loop();
+        return;
     }
 
     {
@@ -227,6 +300,7 @@ void NetworkNode::handle_replica_read_data(const boost::system::error_code& erro
         page_received_[page_index] = true;
         page_request_in_flight_[page_index] = false;
         page_accessible_[page_index] = true;
+        stats_.pages_received.fetch_add(1, std::memory_order_relaxed);
         wait_cv_.notify_all();
     }
 
@@ -246,8 +320,12 @@ void NetworkNode::start_primary_read_loop(uint32_t client_id) {
 
 void NetworkNode::handle_primary_read_header(uint32_t client_id, const boost::system::error_code& error, std::size_t) {
     if (error) {
-        if (error != boost::asio::error::operation_aborted && error != boost::asio::error::eof) {
+        if (error != boost::asio::error::operation_aborted && error != boost::asio::error::eof && error != boost::asio::error::connection_reset) {
             std::cerr << "Primary read header failed for client " << client_id << ": " << error.message() << std::endl;
+        }
+        if (clients_.count(client_id)) {
+            boost::system::error_code ec;
+            clients_[client_id]->close(ec);
         }
         return;
     }
@@ -268,6 +346,8 @@ void NetworkNode::handle_primary_read_header(uint32_t client_id, const boost::sy
         if (is_first_waiter) {
             if (current_owner == 0) {
                 // Primary currently owns it, send to replica
+                // Delay slightly to prevent live-lock thrashing
+                std::this_thread::sleep_for(std::chrono::microseconds(100));
                 send_page_data(client_id, page_index);
             } else {
                 // Another replica owns it, request it
@@ -283,6 +363,7 @@ void NetworkNode::handle_primary_read_header(uint32_t client_id, const boost::sy
         }
         start_primary_read_loop(client_id);
     } else if (primary_read_headers_[client_id].type == MsgType::SyncRequest) {
+        send_sync_response(client_id);
         start_primary_read_loop(client_id);
     } else if (primary_read_headers_[client_id].type == MsgType::PageData) {
         // Replica returned a page
@@ -329,6 +410,7 @@ void NetworkNode::handle_primary_read_data(uint32_t client_id, const boost::syst
             page_received_[page_index] = true;
             page_request_in_flight_[page_index] = false;
             page_accessible_[page_index] = true;
+            stats_.pages_received.fetch_add(1, std::memory_order_relaxed);
             wait_cv_.notify_all();
         }
         
@@ -340,13 +422,21 @@ void NetworkNode::handle_primary_read_data(uint32_t client_id, const boost::syst
                 std::lock_guard<std::mutex> lock(ownership_mutex_);
                 if (!primary_page_waiters_[page_index].empty()) {
                     next_target = primary_page_waiters_[page_index].front();
+                    primary_page_waiters_[page_index].pop();
+                    primary_page_owner_[page_index] = next_target;
                     forward_needed = true;
                 }
             }
             if (forward_needed) {
-                send_page_data(next_target, page_index);
+                boost::asio::post(io_context_, [this, next_target, page_index]() {
+                    std::this_thread::sleep_for(std::chrono::microseconds(100));
+                    send_page_data(next_target, page_index);
+                });
             }
         }
+        
+        start_primary_read_loop(client_id);
+        return;
     } else {
         // Forward data to the next owner replica!
         // We write directly to the socket from this IO thread.
@@ -440,7 +530,7 @@ bool NetworkNode::request_page(void* fault_address) {
             lock.lock();
         }
 
-        wait_cv_.wait(lock);
+        wait_cv_.wait(lock, [this, page_index]() { return page_accessible_[page_index]; });
     }
 }
 
@@ -458,8 +548,20 @@ void NetworkNode::send_page_request(uint32_t target_node_id, uint32_t page_index
         std::lock_guard<std::mutex> lock(replica_socket_write_mutex_);
         boost::asio::write(*replica_socket_, boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
     } else {
-        std::lock_guard<std::mutex> lock(*client_write_mutexes_[target_node_id]);
-        boost::asio::write(*clients_[target_node_id], boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+        std::mutex* client_mutex_ptr = nullptr;
+        std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex_);
+            auto it = client_write_mutexes_.find(target_node_id);
+            if (it != client_write_mutexes_.end()) {
+                client_mutex_ptr = it->second.get();
+                socket_ptr = clients_[target_node_id];
+            }
+        }
+        if (client_mutex_ptr && socket_ptr) {
+            std::lock_guard<std::mutex> lock(*client_mutex_ptr);
+            boost::asio::write(*socket_ptr, boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+        }
     }
     
     if (ec) {
@@ -499,11 +601,40 @@ void NetworkNode::send_page_data(uint32_t target_node_id, uint32_t page_index) {
         };
 
         boost::system::error_code ec;
+        auto start_time = std::chrono::steady_clock::now();
         boost::asio::write(*replica_socket_, buffers, ec);
+        auto end_time = std::chrono::steady_clock::now();
+        
+        uint64_t duration_us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+        stats_.total_transfer_time_us.fetch_add(duration_us, std::memory_order_relaxed);
+        
+        {
+            std::lock_guard<std::mutex> stat_lock(stats_mutex_);
+            if (has_first_transfer_) {
+                uint64_t between_us = std::chrono::duration_cast<std::chrono::microseconds>(start_time - last_transfer_end_time_).count();
+                stats_.total_time_between_transfers_us.fetch_add(between_us, std::memory_order_relaxed);
+            }
+            has_first_transfer_ = true;
+            last_transfer_end_time_ = end_time;
+        }
+
+        stats_.pages_sent.fetch_add(1, std::memory_order_relaxed);
     } else {
         // PRIMARY LOGIC: send to Replica
+        std::mutex* client_mutex_ptr = nullptr;
+        std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
         {
-            std::lock_guard<std::mutex> write_lock(*client_write_mutexes_[target_node_id]);
+            std::lock_guard<std::mutex> lock(clients_mutex_);
+            auto it = client_write_mutexes_.find(target_node_id);
+            if (it != client_write_mutexes_.end()) {
+                client_mutex_ptr = it->second.get();
+                socket_ptr = clients_[target_node_id];
+            }
+        }
+        if (!client_mutex_ptr || !socket_ptr) return;
+
+        {
+            std::lock_guard<std::mutex> write_lock(*client_mutex_ptr);
 
             {
                 std::lock_guard<std::mutex> lock(ownership_mutex_);
@@ -533,7 +664,24 @@ void NetworkNode::send_page_data(uint32_t target_node_id, uint32_t page_index) {
             };
 
             boost::system::error_code ec;
-            boost::asio::write(*clients_[target_node_id], buffers, ec);
+            auto start_time = std::chrono::steady_clock::now();
+            boost::asio::write(*socket_ptr, buffers, ec);
+            auto end_time = std::chrono::steady_clock::now();
+            
+            uint64_t duration_us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+            stats_.total_transfer_time_us.fetch_add(duration_us, std::memory_order_relaxed);
+            
+            {
+                std::lock_guard<std::mutex> stat_lock(stats_mutex_);
+                if (has_first_transfer_) {
+                    uint64_t between_us = std::chrono::duration_cast<std::chrono::microseconds>(start_time - last_transfer_end_time_).count();
+                    stats_.total_time_between_transfers_us.fetch_add(between_us, std::memory_order_relaxed);
+                }
+                has_first_transfer_ = true;
+                last_transfer_end_time_ = end_time;
+            }
+
+            stats_.pages_sent.fetch_add(1, std::memory_order_relaxed);
         }
         
         // If there are more waiters, we must request it!

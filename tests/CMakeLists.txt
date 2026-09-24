@@ -8,6 +8,7 @@ add_executable(geryon_tests
     test_memnon_integration.cpp
     test_consistency.cpp
     test_correctness.cpp
+    test_distributed_sort.cpp
 )
 
 target_link_libraries(geryon_tests

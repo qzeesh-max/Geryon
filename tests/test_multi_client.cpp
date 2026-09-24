@@ -44,7 +44,7 @@ TEST(MultiClientTest, StarTopologyBouncing) {
     NetworkNode primary_node(&primary_region, true);
     
     auto primary_fault = FaultHandler::create();
-    primary_fault->register_region(primary_region.base_address(), primary_region.size(), [&](void* addr) -> bool {
+    primary_fault->register_region_with_io(primary_region.base_address(), primary_region.io_address(), primary_region.size(), [&](void* addr) -> bool {
         return primary_node.request_page(addr);
     });
     primary_node.start_primary(port);
@@ -64,7 +64,7 @@ TEST(MultiClientTest, StarTopologyBouncing) {
         replica_nodes.push_back(std::make_unique<NetworkNode>(replica_regions.back().get(), false));
         
         auto replica_fault = FaultHandler::create();
-        replica_fault->register_region(replica_regions.back()->base_address(), replica_regions.back()->size(), [node = replica_nodes.back().get()](void* addr) -> bool {
+        replica_fault->register_region_with_io(replica_regions.back()->base_address(), replica_regions.back()->io_address(), replica_regions.back()->size(), [node = replica_nodes.back().get()](void* addr) -> bool {
             return node->request_page(addr);
         });
         replica_faults.push_back(std::move(replica_fault));

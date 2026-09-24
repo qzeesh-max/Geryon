@@ -55,6 +55,8 @@ TEST_F(ConsistencyTest, TriggerSynchronization) {
     std::cerr << "Simulating replica page request 2" << std::endl;
     replica_node.request_page(replica_ptr + 8192);
     
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
     std::cerr << "Replica writing to pages" << std::endl;
     replica_ptr[4096] = 42;
     replica_ptr[8192] = 84;

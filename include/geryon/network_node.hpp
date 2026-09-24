@@ -56,6 +56,22 @@ public:
     // Forces all pages back to the Primary and ensures consistency
     void trigger_synchronization();
 
+    struct Statistics {
+        std::atomic<uint64_t> pages_sent{0};
+        std::atomic<uint64_t> pages_received{0};
+        std::atomic<uint64_t> total_transfer_time_us{0};
+        std::atomic<uint64_t> total_time_between_transfers_us{0};
+    };
+
+    Statistics get_statistics() const { 
+        return Statistics{
+            stats_.pages_sent.load(), 
+            stats_.pages_received.load(),
+            stats_.total_transfer_time_us.load(),
+            stats_.total_time_between_transfers_us.load()
+        }; 
+    }
+
 private:
     void accept_connection();
     
@@ -85,6 +101,7 @@ private:
     
     // Primary sockets
     uint32_t next_client_id_{1};
+    std::mutex clients_mutex_;
     std::unordered_map<uint32_t, std::shared_ptr<boost::asio::ip::tcp::socket>> clients_;
     std::unordered_map<uint32_t, std::unique_ptr<std::mutex>> client_write_mutexes_;
 
@@ -139,7 +156,14 @@ private:
     // Consistency sync logic
     std::condition_variable sync_cv_;
     std::atomic<int> pending_sync_responses_{0};
+
+    // Performance metrics tracking
+    std::mutex stats_mutex_;
+    std::chrono::steady_clock::time_point last_transfer_end_time_;
+    bool has_first_transfer_{false};
     std::atomic<bool> is_stopping_{false};
+
+    Statistics stats_;
 };
 
 } // namespace geryon

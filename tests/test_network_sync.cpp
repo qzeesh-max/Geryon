@@ -82,12 +82,12 @@ TEST(NetworkSyncTest, StressTest) {
     NetworkNode replica_node(&replica_region, false);
     
     auto replica_fault = FaultHandler::create();
-    replica_fault->register_region(replica_region.base_address(), size, [&](void* addr) -> bool {
+    replica_fault->register_region_with_io(replica_region.base_address(), replica_region.io_address(), size, [&](void* addr) -> bool {
         return replica_node.request_page(addr);
     });
 
     auto primary_fault = FaultHandler::create();
-    primary_fault->register_region(primary_region.base_address(), size, [&](void* addr) -> bool {
+    primary_fault->register_region_with_io(primary_region.base_address(), primary_region.io_address(), size, [&](void* addr) -> bool {
         return primary_node.request_page(addr);
     });
 

@@ -36,6 +36,16 @@ public:
     virtual void register_region(void* base_address, std::size_t size, PageFaultCallback callback) = 0;
     virtual void unregister_region(void* base_address) = 0;
 
+    // Extended registration providing the io_address mirror.
+    // On Linux with userfaultfd, this allows the handler to issue UFFDIO_COPY
+    // with real page data rather than a zero page. On other platforms, this
+    // defaults to register_region() (io_address is unused).
+    virtual void register_region_with_io(void* base_address, void* io_address,
+                                         std::size_t size, PageFaultCallback callback) {
+        (void)io_address;
+        register_region(base_address, size, std::move(callback));
+    }
+
     // Factory method to get the platform-specific fault handler instance
     static std::unique_ptr<FaultHandler> create();
 };

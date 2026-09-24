@@ -44,7 +44,7 @@ TEST(InterprocessTest, SharedVector) {
     
     // Fault Handler on Replica
     auto fault_handler = FaultHandler::create();
-    fault_handler->register_region(replica_region.base_address(), size, [&](void* addr) -> bool {
+    fault_handler->register_region_with_io(replica_region.base_address(), replica_region.io_address(), size, [&](void* addr) -> bool {
         return replica_node.request_page(addr);
     });
 
@@ -81,7 +81,7 @@ TEST(InterprocessTest, SharedVector) {
     // Fault Handler on Primary
     // Since primary gave up some pages, it needs a fault handler too!
     auto primary_fault_handler = FaultHandler::create();
-    primary_fault_handler->register_region(primary_region.base_address(), size, [&](void* addr) -> bool {
+    primary_fault_handler->register_region_with_io(primary_region.base_address(), primary_region.io_address(), size, [&](void* addr) -> bool {
         return primary_node.request_page(addr);
     });
 

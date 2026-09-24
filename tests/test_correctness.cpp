@@ -50,7 +50,7 @@ TEST(CorrectnessTest, MultithreadMultipageCorrectness) {
     primary_region.set_protection(primary_region.base_address(), region_size, PageProtection::ReadWrite);
     NetworkNode primary_node(&primary_region, true);
     auto primary_fault = FaultHandler::create();
-    primary_fault->register_region(primary_region.base_address(), region_size, [&](void* addr) -> bool {
+    primary_fault->register_region_with_io(primary_region.base_address(), primary_region.io_address(), region_size, [&](void* addr) -> bool {
         return primary_node.request_page(addr);
     });
     primary_node.start_primary(port);
@@ -74,7 +74,7 @@ TEST(CorrectnessTest, MultithreadMultipageCorrectness) {
         replica_nodes.push_back(std::make_unique<NetworkNode>(replica_regions.back().get(), false));
         
         auto replica_fault = FaultHandler::create();
-        replica_fault->register_region(replica_regions.back()->base_address(), region_size, [node = replica_nodes.back().get()](void* addr) -> bool {
+        replica_fault->register_region_with_io(replica_regions.back()->base_address(), replica_regions.back()->io_address(), region_size, [node = replica_nodes.back().get()](void* addr) -> bool {
             return node->request_page(addr);
         });
         replica_faults.push_back(std::move(replica_fault));
@@ -125,6 +125,8 @@ TEST(CorrectnessTest, MultithreadMultipageCorrectness) {
     for (auto& node : replica_nodes) node->stop();
     primary_node.stop();
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     primary_fault->unregister_region(primary_region.base_address());
     for (size_t i = 0; i < replica_regions.size(); ++i) {
         replica_faults[i]->unregister_region(replica_regions[i]->base_address());
@@ -146,7 +148,7 @@ void run_multiprocess_replica(uint16_t port) {
     NetworkNode replica_node(&replica_region, false);
     
     auto replica_fault = FaultHandler::create();
-    replica_fault->register_region(replica_region.base_address(), region_size, [&](void* addr) -> bool {
+    replica_fault->register_region_with_io(replica_region.base_address(), replica_region.io_address(), region_size, [&](void* addr) -> bool {
         return replica_node.request_page(addr);
     });
 
@@ -202,7 +204,7 @@ TEST(CorrectnessTest, MultiprocessMultipageCorrectness) {
     primary_region.set_protection(primary_region.base_address(), region_size, PageProtection::ReadWrite);
     NetworkNode primary_node(&primary_region, true);
     auto primary_fault = FaultHandler::create();
-    primary_fault->register_region(primary_region.base_address(), region_size, [&](void* addr) -> bool {
+    primary_fault->register_region_with_io(primary_region.base_address(), primary_region.io_address(), region_size, [&](void* addr) -> bool {
         return primary_node.request_page(addr);
     });
     primary_node.start_primary(port);

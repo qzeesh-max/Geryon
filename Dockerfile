@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     libboost-system-dev \
     libboost-thread-dev \
     libboost-program-options-dev \
-    libboost-test-dev
+    libboost-test-dev \
+    gdb
 
 WORKDIR /app
 COPY . /app
@@ -20,4 +21,4 @@ RUN mkdir -p build-linux && cd build-linux && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make -j$(nproc)
 
-CMD sh -c "cd build-linux && ctest --output-on-failure"
+CMD ["./build-linux/tests/geryon_tests"]

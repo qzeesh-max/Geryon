@@ -19,4 +19,12 @@ echo "Building Docker image for Geryon Linux tests..."
 docker build -t geryon-linux-tests .
 
 echo "Running tests in Docker container..."
-docker run --rm geryon-linux-tests
+# userfaultfd requires either --privileged or seccomp=unconfined.
+# Docker's default seccomp profile does not whitelist the userfaultfd(2) syscall,
+# which Geryon uses on Linux for signal-safe page fault interception.
+# We use seccomp=unconfined as the portable option; in production environments
+# a tailored seccomp profile whitelisting only userfaultfd should be used instead.
+docker run --rm --shm-size=256m \
+    --security-opt seccomp=unconfined \
+    --cap-add SYS_PTRACE \
+    geryon-linux-tests

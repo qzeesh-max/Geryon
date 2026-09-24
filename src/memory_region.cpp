@@ -93,6 +93,11 @@ MemoryRegion::MemoryRegion(std::size_t size) {
         throw std::system_error(errno, std::generic_category(), "ftruncate failed");
     }
 
+    // Both Linux and macOS use MAP_SHARED from the shm_fd.
+    // base_address_ is PROT_NONE-mapped to intercept accesses via SIGSEGV.
+    // io_address_ is PROT_READ|PROT_WRITE-mapped as the always-accessible data view.
+    // Since both map the same shm object, reads/writes in one view are immediately
+    // visible in the other — no explicit flush is needed on either platform.
     base_address_ = mmap(nullptr, size_, PROT_NONE, MAP_SHARED, fd, 0);
     if (base_address_ == MAP_FAILED) {
         close(fd);
@@ -136,9 +141,9 @@ void MemoryRegion::set_protection(void* address, std::size_t length, PageProtect
 #else
     int posix_prot = PROT_NONE;
     switch (prot) {
-        case PageProtection::None: posix_prot = PROT_NONE; break;
+        case PageProtection::None:      posix_prot = PROT_NONE;            break;
         case PageProtection::ReadWrite: posix_prot = PROT_READ | PROT_WRITE; break;
-        case PageProtection::ReadOnly: posix_prot = PROT_READ; break;
+        case PageProtection::ReadOnly:  posix_prot = PROT_READ;            break;
     }
     if (mprotect(address, length, posix_prot) != 0) {
         throw std::system_error(errno, std::generic_category(), "mprotect failed");
