@@ -55,8 +55,8 @@
 //        condition variables, network I/O — it's a normal thread context)
 //     3. Calls sem_post() to wake the faulting thread
 //
-// This gives us the full power of userfaultfd-style deferred processing
-// without requiring MAP_PRIVATE|MAP_ANONYMOUS or kernel 5.13+.
+// This gives us the full power of deferred processing
+// without requiring complex kernel integration.
 // --------------------------------------------------------------------------
 #  include <sys/mman.h>
 #  include <sys/syscall.h>

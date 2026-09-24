@@ -71,6 +71,9 @@ public:
             stats_.total_time_between_transfers_us.load()
         }; 
     }
+    void set_on_primary_disconnect(std::function<void()> callback) {
+        on_primary_disconnect_ = std::move(callback);
+    }
 
 private:
     void accept_connection();
@@ -97,6 +100,7 @@ private:
     bool is_primary_;
     bool read_only_mode_{false};
     bool is_connected_to_primary_{false};
+    std::function<void()> on_primary_disconnect_;
     
     boost::asio::io_context io_context_;
     std::unique_ptr<boost::asio::ip::tcp::acceptor> acceptor_;

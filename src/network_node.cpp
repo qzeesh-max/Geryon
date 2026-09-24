@@ -820,6 +820,10 @@ void NetworkNode::handle_primary_disconnect() {
     }
     
     wait_cv_.notify_all();
+
+    if (on_primary_disconnect_) {
+        on_primary_disconnect_();
+    }
 }
 
 void NetworkNode::handle_client_disconnect(uint32_t client_id) {

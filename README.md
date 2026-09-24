@@ -13,6 +13,7 @@ Geryon supports integration with existing memory mapping and interprocess commun
 *   **Transparent Page Fault Synchronization:** Geryon traps segmentation faults (soft faults) natively and orchestrates "Bouncing Ownership" page retrieval over TCP sockets, completely transparent to the accessing threads.
 *   **Distributed Concurrency Control:** Includes a custom `geryon::recursive_spin_lock` which natively supports network backoff, mitigating lock starvation when pages rapidly bounce between nodes.
 *   **Manual State Synchronization:** Forces cache consistency by manually flushing pages from replicas back to the primary, paired with a graceful connection teardown handshake.
+*   **Read-Only Replicas & Failover:** Supports operating replicas in a read-only mode, with automated wait-for-failover behavior and custom callbacks when primary connections drop.
 *   **Third-Party Allocator Integration:** Easily drop-in advanced memory managers (e.g., `boost::interprocess` managed segments) and let Geryon handle the synchronization underneath.
 
 ## Architecture
@@ -233,6 +234,20 @@ primary_node.trigger_synchronization();
 // Graceful stop ensuring all data is flushed and synchronized
 replica_node.stop();
 primary_node.stop();
+```
+
+### 5. Read-Only Replicas & Failover
+
+Replicas can be instantiated in read-only mode. In this mode, replica nodes have read access to the distributed memory, but any write attempts will safely block the faulting thread until the primary node disconnects.
+
+```cpp
+// Start the replica in read-only mode (read_only = true)
+replica_node.start_replica("192.168.1.10", 12345, true);
+
+// Set up a callback for when the primary dies
+replica_node.set_on_primary_disconnect([]() {
+    std::cout << "Primary disconnected! Replica promoted to R/W." << std::endl;
+});
 ```
 
 ## License

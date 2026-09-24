@@ -37,8 +37,8 @@ public:
     virtual void unregister_region(void* base_address) = 0;
 
     // Extended registration providing the io_address mirror.
-    // On Linux with userfaultfd, this allows the handler to issue UFFDIO_COPY
-    // with real page data rather than a zero page. On other platforms, this
+    // On Linux, this allows the handler to issue copies to the secondary mapping
+    // with real page data. On other platforms, this
     // defaults to register_region() (io_address is unused).
     virtual void register_region_with_io(void* base_address, void* io_address,
                                          std::size_t size, PageFaultCallback callback) {
