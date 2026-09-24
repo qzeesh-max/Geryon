@@ -11,6 +11,7 @@ add_executable(geryon_tests
     test_distributed_sort.cpp
     test_readonly_replica.cpp
     test_network_recovery.cpp
+    test_memnon_segmented.cpp
 )
 
 target_link_libraries(geryon_tests
