@@ -44,7 +44,7 @@ public:
     void start_primary(uint16_t port);
 
     // Start as Replica (connect to Primary)
-    void start_replica(const std::string& host, uint16_t port);
+    void start_replica(const std::string& host, uint16_t port, bool read_only = false);
 
     // Stop networking
     void stop();
@@ -79,11 +79,14 @@ private:
     void start_replica_read_loop();
     void handle_replica_read_header(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_replica_read_data(const boost::system::error_code& error, std::size_t bytes_transferred);
+    void handle_primary_disconnect();
 
     // Primary uses this:
     void start_primary_read_loop(uint32_t client_id);
     void handle_primary_read_header(uint32_t client_id, const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_primary_read_data(uint32_t client_id, const boost::system::error_code& error, std::size_t bytes_transferred);
+    void handle_client_disconnect(uint32_t client_id);
+    void process_next_waiter(uint32_t page_index);
     
     void send_page_request(uint32_t target_node_id, uint32_t page_index);
     void send_page_data(uint32_t target_node_id, uint32_t page_index);
@@ -92,6 +95,8 @@ private:
 
     MemoryRegion* region_;
     bool is_primary_;
+    bool read_only_mode_{false};
+    bool is_connected_to_primary_{false};
     
     boost::asio::io_context io_context_;
     std::unique_ptr<boost::asio::ip::tcp::acceptor> acceptor_;
