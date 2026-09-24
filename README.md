@@ -22,6 +22,12 @@ Geryon uses a **Star Topology Directory** protocol. Memory pages initially resid
 
 When any node attempts to read or write a page it does not own, the OS throws an access violation/segmentation fault. Geryon's `GlobalFaultRegistry` catches this fault, pauses the faulting thread, and negotiates with the Primary to transfer the memory page over TCP.
 
+### Why not `userfaultfd` on Linux?
+
+While Linux provides `userfaultfd` for userspace page fault handling, Geryon relies on native POSIX signal handling (`sigaction(SIGSEGV)` + `siginfo_t`) instead. 
+
+`userfaultfd` requires a dedicated polling thread to asynchronously read fault events from a file descriptor. This enforces an asynchronous architecture better suited for Virtual Machine Monitors (like QEMU) during live migration. Geryon is a thread-level concurrency framework where hundreds of application threads may fault concurrently. Using `SIGSEGV` ensures that the OS *synchronously* suspends only the specific faulting thread directly in the kernel, without bottlenecking through a single userspace polling queue. This preserves the multi-threaded concurrency model of the host application naturally.
+
 ### Bouncing Ownership Model (Multi-Client)
 
 If Replica 1 requests a page that Replica 2 currently owns, the Primary brokers the transfer by requesting the page from Replica 2, and then forwarding the page to Replica 1. The framework uses a queue-based system to handle concurrent requests for the same page, allowing any number of replicas to continuously contest and modify the memory space.
