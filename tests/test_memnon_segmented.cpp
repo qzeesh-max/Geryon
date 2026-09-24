@@ -25,30 +25,39 @@
  * Two processes (primary and replica) share two memory spaces:
  *
  *   1. Geryon MemoryRegion  — a TCP-synchronized region holding an
- *      append-only TransactionLog.  The log entries contain the name of the
- *      Memnon named object and a checksum of its payload so the replica can
- *      validate what it reads.
+ *      append-only TransactionLog.  Each entry carries the Memnon named
+ *      object key, the FNV-1a checksum of the payload, and the word count,
+ *      so the replica can locate and fully validate the data it receives.
  *
  *   2. Memnon segmented_managed_memory — a POSIX-SHM-backed allocator that
  *      starts at 1 MiB and grows across multiple sub-segments as the primary
- *      commits large payloads.  Because Memnon uses shm_open() the replica
- *      opens the same POSIX SHM name and can access the data directly,
- *      without extra network round-trips.
+ *      commits large payloads.  Both processes open the same SHM root name;
+ *      the replica can call find<DataRecord>(name) to obtain a direct pointer
+ *      into the shared segment and verify every byte.
  *
  * Workflow
  * ────────
  *   Primary:
  *     for each transaction i:
- *       1. Allocate a large DataRecord in Memnon (fills one initial segment,
- *          forcing Memnon to grow a new sub-segment on the second iteration).
- *       2. Fill the record with a deterministic pattern keyed by `i`.
- *       3. Append a LogEntry (record name + checksum) to the Geryon log and
- *          advance the atomic tail.
+ *       1. construct<DataRecord>(name) in Memnon — fills the initial segment,
+ *          forcing Memnon to grow a new sub-segment on subsequent iterations.
+ *       2. Fill every element with a deterministic pattern keyed by tx_id.
+ *       3. Compute FNV-1a checksum of all data words.
+ *       4. Append a LogEntry {name, checksum, word_count, tx_id} to the
+ *          Geryon log and advance the atomic tail.
+ *
  *   Replica:
  *     for each transaction i:
- *       1. Spin until the Geryon log tail advances past i (Geryon page faults
- *          pull the log page from the primary over TCP).
- *       2. Read the LogEntry, open the named Memnon object, verify checksum.
+ *       1. Spin on the Geryon log tail (page faults pull data from primary).
+ *       2. Call memnon.find<DataRecord>(entry.name) — reads actual bytes from
+ *          the POSIX SHM segment; no data is re-derived locally.
+ *       3. Verify tx_id, word_count, every individual data element, and the
+ *          FNV-1a checksum against what the primary wrote into the Geryon log.
+ *       4. On any mismatch, record the failure in the log and set
+ *          replica_result=FAIL before signalling replica_done.
+ *
+ *   Primary (after replica_done):
+ *     Asserts replica_result == RESULT_OK so GTest catches any replica failures.
  */
 
 #include <gtest/gtest.h>
@@ -60,6 +69,7 @@
 #include <atomic>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <thread>
 #include <chrono>
@@ -74,73 +84,100 @@ namespace si = segmented_interprocess;
 // Constants
 // ============================================================================
 
-static constexpr uint16_t kPort             = 15780;
-static constexpr int      kNumTransactions  = 6;
-// Payload size chosen to exceed the 1 MiB initial Memnon segment after 2 allocs.
-static constexpr std::size_t kPayloadWords  = 120'000; // ~960 KB per record
-static constexpr std::size_t kPayloadBytes  = kPayloadWords * sizeof(uint32_t);
-static const char* kMemnonShmName           = "geryon_memnon_txlog_test";
-
-// ============================================================================
-// Shared data structures (live inside the Geryon MemoryRegion)
-// ============================================================================
-
-struct LogEntry {
-    char     name[64];       ///< Name of the Memnon named object for this tx
-    uint32_t checksum;       ///< Expected XOR-checksum of the payload
-    uint32_t payload_words;  ///< Number of uint32_t elements in the payload
-    uint32_t tx_id;          ///< Transaction sequence number (0-based)
-};
-
-struct TransactionLog {
-    // Primary sets this to 1 once it has started_primary() and is ready.
-    alignas(64) std::atomic<uint32_t> primary_ready{0};
-    char _pad0[60];
-
-    // Atomic tail: incremented by primary after each commit.
-    // Replica spins until tail > its current read position.
-    alignas(64) std::atomic<uint32_t> tail{0};
-    char _pad[60];
-
-    // Replica sets this to signal it has finished all reads.
-    alignas(64) std::atomic<uint32_t> replica_done{0};
-    char _pad2[60];
-
-    LogEntry entries[kNumTransactions];
-};
+static constexpr uint16_t kPort            = 15780;
+static constexpr int      kNumTransactions = 6;
+// Each DataRecord is ~480 KB; with 6 records we exceed the 1 MiB initial
+// Memnon segment, forcing it to grow across multiple sub-segments.
+static constexpr uint32_t kPayloadWords    = 120'000;
+static const char*        kMemnonShmName   = "geryon_memnon_txlog_test";
 
 // ============================================================================
 // DataRecord — lives inside the Memnon segmented shared memory
+//
+// Fixed-size array so that Memnon's construct<DataRecord>(name)() works and
+// the replica can call find<DataRecord>(name) to get a typed pointer directly
+// into the shared segment.
 // ============================================================================
 
 struct DataRecord {
     uint32_t tx_id;
     uint32_t word_count;
-    uint32_t data[1]; // flexible-length; actually kPayloadWords elements
+    uint32_t data[kPayloadWords];
 };
 
-// Compute a FNV-1a-inspired checksum that stays non-zero.
-static uint32_t compute_checksum(const uint32_t* data, std::size_t count) {
-    uint32_t cs = 0x811c9dc5u; // FNV offset basis
-    for (std::size_t i = 0; i < count; ++i) {
-        cs ^= data[i];
-        cs *= 0x01000193u; // FNV prime
+// ============================================================================
+// Shared data structures (live inside the Geryon MemoryRegion)
+// ============================================================================
+
+// Replica result codes written back into the log so the primary can assert.
+static constexpr uint32_t RESULT_PENDING = 0;
+static constexpr uint32_t RESULT_OK      = 1;
+static constexpr uint32_t RESULT_FAIL    = 2;
+
+struct LogEntry {
+    char     name[64];       ///< Memnon construct<DataRecord> key
+    uint32_t checksum;       ///< FNV-1a checksum of all data[] words
+    uint32_t payload_words;  ///< Always kPayloadWords
+    uint32_t tx_id;          ///< Sequence number (0-based)
+
+    // ── Replica validation results for this entry ──────────────────────────
+    // Written by the replica after it reads the data from Memnon.
+    uint32_t replica_tx_id_seen;      ///< DataRecord::tx_id read from Memnon
+    uint32_t replica_checksum_actual; ///< Checksum the replica computed
+    uint32_t replica_first_bad_word;  ///< Index of first mismatched word (or ~0u)
+    uint32_t replica_bad_expected;    ///< Expected value at that index
+    uint32_t replica_bad_actual;      ///< Actual value at that index
+};
+
+struct TransactionLog {
+    // Primary sets this to 1 once start_primary() has returned and the
+    // Memnon SHM has been created.
+    alignas(64) std::atomic<uint32_t> primary_ready{0};
+    char _pad0[60];
+
+    // Incremented by primary after each named-object commit.
+    alignas(64) std::atomic<uint32_t> tail{0};
+    char _pad1[60];
+
+    // Replica writes RESULT_OK / RESULT_FAIL, then sets replica_done=1.
+    alignas(64) std::atomic<uint32_t> replica_result{RESULT_PENDING};
+    char _pad2[60];
+
+    alignas(64) std::atomic<uint32_t> replica_done{0};
+    char _pad3[60];
+
+    LogEntry entries[kNumTransactions];
+};
+
+// ============================================================================
+// Deterministic pattern & checksum helpers
+// ============================================================================
+
+/// Fill data[] with a deterministic per-tx pattern using additive mixing
+/// (avoids XOR cancellation artifacts that produce all-zero checksums).
+static void fill_payload(uint32_t* data, uint32_t word_count, uint32_t tx_id) {
+    for (uint32_t i = 0; i < word_count; ++i) {
+        data[i] = (tx_id * 0x9e3779b9u) + i * 0x6c62272eu + 0xdeadcafeu;
     }
-    return cs ? cs : 0xdeadbeefu; // guarantee non-zero
 }
 
-// Fill a DataRecord payload with a deterministic pattern based on tx_id.
-static void fill_record(DataRecord* rec, uint32_t tx_id, uint32_t word_count) {
-    rec->tx_id      = tx_id;
-    rec->word_count = word_count;
-    for (uint32_t i = 0; i < word_count; ++i) {
-        // Use additive mixing so adjacent values don't cancel in XOR.
-        rec->data[i] = (tx_id * 0x9e3779b9u) + i * 0x6c62272eu + 0xdeadcafeu;
+/// Expected value at word index i for a given tx_id (same formula as above).
+static inline uint32_t expected_word(uint32_t tx_id, uint32_t i) {
+    return (tx_id * 0x9e3779b9u) + i * 0x6c62272eu + 0xdeadcafeu;
+}
+
+/// FNV-1a-inspired checksum over all data words; guaranteed non-zero.
+static uint32_t compute_checksum(const uint32_t* data, uint32_t count) {
+    uint32_t cs = 0x811c9dc5u;
+    for (uint32_t i = 0; i < count; ++i) {
+        cs ^= data[i];
+        cs *= 0x01000193u;
     }
+    return cs ? cs : 0xdeadbeefu;
 }
 
 // ============================================================================
-// Helper: round up to page size
+// Helper: round up to OS page size
 // ============================================================================
 
 static std::size_t page_align(std::size_t n) {
@@ -149,14 +186,15 @@ static std::size_t page_align(std::size_t n) {
 }
 
 // ============================================================================
-// Primary logic
+// Primary process logic
 // ============================================================================
 
 static void run_primary() {
-    // --- Geryon log region ---
-    std::size_t log_size = page_align(sizeof(TransactionLog));
+    // ── Geryon log region ────────────────────────────────────────────────────
+    const std::size_t log_size = page_align(sizeof(TransactionLog));
     MemoryRegion log_region(log_size);
-    log_region.set_protection(log_region.base_address(), log_size, PageProtection::ReadWrite);
+    log_region.set_protection(log_region.base_address(), log_size,
+                              PageProtection::ReadWrite);
 
     auto* log = new (log_region.base_address()) TransactionLog();
 
@@ -167,13 +205,21 @@ static void run_primary() {
         [&](void* addr) -> bool { return primary_node.request_page(addr); });
 
     primary_node.start_primary(kPort);
-    std::cout << "[Primary] Listening on port " << kPort << std::endl;
+    std::cout << "[Primary] Listening on port " << kPort << "\n";
 
-    // Signal that the primary is ready to accept connections.
+    // ── Memnon segmented SHM (creator) ──────────────────────────────────────
+    // Start at kMinSegmentSize (1 MiB) so we force growth after the first
+    // DataRecord allocation (~480 KB * 2 > 1 MiB).
+    si::segmented_managed_memory memnon(kMemnonShmName, si::create_only,
+                                        si::kMinSegmentSize);
+    std::cout << "[Primary] Memnon created — segments: " << memnon.segment_count()
+              << "  size: " << memnon.get_size() << " B\n";
+
+    // Signal to replica that primary socket AND Memnon SHM are ready.
     log->primary_ready.store(1, std::memory_order_release);
 
-    // Spawn the replica subprocess now that the primary is bound and listening.
-    extern std::string g_exec_path; // set in TEST body before calling run_primary
+    // ── Spawn replica subprocess ─────────────────────────────────────────────
+    extern std::string g_exec_path;
     std::string cmd = g_exec_path
         + " --gtest_filter=MemnonSegmentedTest.TransactionalGrowthAcrossNodes"
         + " --run_as_memnon_replica";
@@ -187,74 +233,91 @@ static void run_primary() {
     std::thread replica_launcher([cmd]() { std::system(cmd.c_str()); });
     replica_launcher.detach();
 
-    // --- Memnon segmented memory (creator) ---
-    // Start small (1 MiB) so we force segment growth after the first large alloc.
-    si::segmented_managed_memory memnon(
-        kMemnonShmName,
-        si::create_only,
-        si::kMinSegmentSize);
-
-    std::cout << "[Primary] Memnon created. Initial segments: "
-              << memnon.segment_count() << ", size: "
-              << memnon.get_size() << " bytes" << std::endl;
-
-    // Wait for replica to connect
+    // Brief pause to let the replica connect before we start committing.
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
+    // ── Commit transactions ──────────────────────────────────────────────────
     for (int i = 0; i < kNumTransactions; ++i) {
-        // Build the object name for this transaction
         char obj_name[64];
         std::snprintf(obj_name, sizeof(obj_name), "tx_record_%d", i);
 
-        // Allocate raw memory for DataRecord + payload in Memnon.
-        // sizeof(DataRecord) already contains data[1]; subtract 1 element.
-        std::size_t rec_bytes = sizeof(DataRecord) + (kPayloadWords - 1) * sizeof(uint32_t);
-        void* raw = memnon.allocate(rec_bytes);
-        if (!raw) throw std::runtime_error("Memnon allocation failed");
+        // construct<DataRecord> allocates the record inside the Memnon SHM
+        // and registers it under obj_name so the replica can find<> it.
+        DataRecord* rec = memnon.construct<DataRecord>(obj_name);
+        if (!rec) throw std::runtime_error("Memnon construct<DataRecord> failed");
 
-        auto* rec = static_cast<DataRecord*>(raw);
-        fill_record(rec, static_cast<uint32_t>(i), kPayloadWords);
-        uint32_t cs = compute_checksum(rec->data, static_cast<std::size_t>(kPayloadWords));
+        rec->tx_id      = static_cast<uint32_t>(i);
+        rec->word_count = kPayloadWords;
+        fill_payload(rec->data, kPayloadWords, rec->tx_id);
+        const uint32_t cs = compute_checksum(rec->data, kPayloadWords);
 
-        std::size_t segs_after = memnon.segment_count();
-        std::cout << "[Primary] Committed tx " << i
-                  << " | Memnon segments: " << segs_after
-                  << " | checksum: 0x" << std::hex << cs << std::dec << std::endl;
+        std::cout << "[Primary] tx " << i
+                  << " | segments: " << memnon.segment_count()
+                  << " | free: "     << memnon.get_free_memory() << " B"
+                  << " | checksum: 0x" << std::hex << cs << std::dec << "\n";
 
-        // Write the LogEntry
+        // Populate the Geryon log entry.
         LogEntry& entry = log->entries[i];
         std::strncpy(entry.name, obj_name, sizeof(entry.name) - 1);
-        entry.checksum     = cs;
+        entry.name[sizeof(entry.name) - 1] = '\0';
+        entry.checksum      = cs;
         entry.payload_words = kPayloadWords;
-        entry.tx_id        = static_cast<uint32_t>(i);
+        entry.tx_id         = static_cast<uint32_t>(i);
 
-        // Advance the tail (replica will see this via Geryon page fault)
+        // Make the entry visible to the replica via the Geryon log.
         log->tail.fetch_add(1, std::memory_order_release);
 
-        // Small delay to allow bouncing to stabilise between transactions
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
-    // Wait for replica to finish
+    // ── Wait for replica acknowledgement ─────────────────────────────────────
     while (log->replica_done.load(std::memory_order_acquire) == 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    std::cout << "[Primary] Replica confirmed. Segment count: "
-              << memnon.segment_count() << std::endl;
+    const uint32_t replica_result = log->replica_result.load(std::memory_order_acquire);
+    std::cout << "[Primary] Replica done. Result: "
+              << (replica_result == RESULT_OK ? "OK" : "FAIL")
+              << "  Final Memnon segments: " << memnon.segment_count() << "\n";
+
+    // Surface any replica failures through GTest on the primary side.
+    if (replica_result != RESULT_OK) {
+        for (int i = 0; i < kNumTransactions; ++i) {
+            const LogEntry& e = log->entries[i];
+            if (e.replica_checksum_actual != 0 && e.replica_checksum_actual != e.checksum) {
+                ADD_FAILURE() << "[Replica] tx " << i
+                              << " checksum mismatch: expected 0x" << std::hex << e.checksum
+                              << " got 0x" << e.replica_checksum_actual << std::dec;
+            }
+            if (e.replica_tx_id_seen != e.tx_id) {
+                ADD_FAILURE() << "[Replica] tx " << i
+                              << " tx_id mismatch: expected " << e.tx_id
+                              << " got " << e.replica_tx_id_seen;
+            }
+            if (e.replica_first_bad_word != ~0u) {
+                ADD_FAILURE() << "[Replica] tx " << i
+                              << " word[" << e.replica_first_bad_word << "] corrupt:"
+                              << " expected 0x" << std::hex << e.replica_bad_expected
+                              << " got 0x"      << e.replica_bad_actual << std::dec;
+            }
+        }
+        ADD_FAILURE() << "Replica reported validation failures (see above).";
+    }
 
     primary_fault->unregister_region(log_region.base_address());
     primary_node.stop();
 }
 
 // ============================================================================
-// Replica logic
+// Replica process logic
 // ============================================================================
 
 static void run_replica() {
-    std::size_t log_size = page_align(sizeof(TransactionLog));
+    // ── Geryon log region ────────────────────────────────────────────────────
+    const std::size_t log_size = page_align(sizeof(TransactionLog));
     MemoryRegion log_region(log_size);
-    log_region.set_protection(log_region.base_address(), log_size, PageProtection::None);
+    log_region.set_protection(log_region.base_address(), log_size,
+                              PageProtection::None);
 
     NetworkNode replica_node(&log_region, /*is_primary=*/false);
     auto replica_fault = FaultHandler::create();
@@ -266,12 +329,13 @@ static void run_replica() {
 
     auto* log = reinterpret_cast<TransactionLog*>(log_region.base_address());
 
-    // --- Open the Memnon shared memory created by the primary ---
-    // Wait until the primary signals it is ready before connecting.
+    // Wait for primary to signal that both the primary socket and the Memnon
+    // SHM have been created before we try to open them.
     while (log->primary_ready.load(std::memory_order_acquire) == 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
+    // ── Open Memnon SHM (opener side) ───────────────────────────────────────
     std::unique_ptr<si::segmented_managed_memory> memnon;
     for (int attempt = 0; attempt < 40; ++attempt) {
         try {
@@ -282,59 +346,114 @@ static void run_replica() {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
     }
-    if (!memnon) throw std::runtime_error("Replica: failed to open Memnon SHM");
+    if (!memnon) {
+        std::cerr << "[Replica] FATAL: could not open Memnon SHM\n";
+        std::exit(2);
+    }
+    std::cout << "[Replica] Memnon opened — segments: " << memnon->segment_count() << "\n";
 
-    std::cout << "[Replica] Memnon opened. Segments: "
-              << memnon->segment_count() << std::endl;
-
+    // ── Validate each transaction ────────────────────────────────────────────
     bool all_ok = true;
+
     for (int i = 0; i < kNumTransactions; ++i) {
-        // Spin until the primary commits transaction i
+        // Spin until the primary commits transaction i (Geryon page faults
+        // synchronize the log page from the primary over TCP).
         while (log->tail.load(std::memory_order_acquire) <= static_cast<uint32_t>(i)) {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
-        const LogEntry& entry = log->entries[i];
+        LogEntry& entry = log->entries[i];
 
-        // Look up the raw allocation in Memnon by scanning the transaction
-        // entries.  In a real system the replica would use a named Memnon
-        // object; here we recompute the record pointer from the known layout
-        // (the primary allocated it anonymously and wrote the checksum into
-        // the log, which is all we need).
-        //
-        // Re-derive the deterministic pattern and compute the checksum
-        // using the same algorithm as the primary, then compare against the
-        // checksum embedded in the Geryon-synchronized log.
-        uint32_t expected_cs = 0x811c9dc5u;
-        for (uint32_t w = 0; w < entry.payload_words; ++w) {
-            uint32_t val = (entry.tx_id * 0x9e3779b9u) + w * 0x6c62272eu + 0xdeadcafeu;
-            expected_cs ^= val;
-            expected_cs *= 0x01000193u;
+        // Force discovery of any new Memnon sub-segments that the primary may
+        // have grown since we opened.  lazy_discover_growth reads the segment
+        // table header in sub-segment 0 and maps any new sub-segments in-process.
+        memnon->get_segment_manager().lazy_discover_growth(
+            std::numeric_limits<std::size_t>::max());
+
+        // ── Step 1: Locate the DataRecord in Memnon SHM ─────────────────────
+        // The primary used construct<DataRecord>(entry.name), so we can
+        // retrieve a direct pointer into the shared segment — no copy, no
+        // re-derivation; we read the actual bytes the primary wrote.
+        auto [rec_ptr, count] = memnon->find<DataRecord>(entry.name);
+
+        // Record the tx_id we actually saw (for primary-side reporting).
+        entry.replica_tx_id_seen = rec_ptr ? rec_ptr->tx_id : ~0u;
+        entry.replica_first_bad_word = ~0u; // sentinel: no corruption found
+
+        if (!rec_ptr) {
+            std::cerr << "[Replica] tx " << i << " — DataRecord '" << entry.name
+                      << "' NOT FOUND in Memnon SHM\n";
+            all_ok = false;
+            entry.replica_checksum_actual = 0;
+            continue;
         }
-        if (!expected_cs) expected_cs = 0xdeadbeefu;
 
-        if (expected_cs != entry.checksum) {
-            std::cerr << "[Replica] MISMATCH at tx " << i
-                      << ": expected 0x" << std::hex << expected_cs
-                      << " got 0x" << entry.checksum << std::dec << std::endl;
+        // ── Step 2: Verify metadata fields ──────────────────────────────────
+        if (rec_ptr->tx_id != entry.tx_id) {
+            std::cerr << "[Replica] tx " << i << " tx_id mismatch in DataRecord: "
+                      << "expected " << entry.tx_id
+                      << " got "     << rec_ptr->tx_id << "\n";
+            all_ok = false;
+        }
+
+        if (rec_ptr->word_count != entry.payload_words) {
+            std::cerr << "[Replica] tx " << i << " word_count mismatch: "
+                      << "expected " << entry.payload_words
+                      << " got "     << rec_ptr->word_count << "\n";
+            all_ok = false;
+        }
+
+        // ── Step 3: Verify every data word individually ──────────────────────
+        // Reading directly from Memnon's POSIX shared memory — these are the
+        // exact bytes written by the primary.
+        const uint32_t words_to_check = std::min(rec_ptr->word_count, kPayloadWords);
+        for (uint32_t w = 0; w < words_to_check; ++w) {
+            const uint32_t expected = expected_word(entry.tx_id, w);
+            const uint32_t actual   = rec_ptr->data[w];
+            if (actual != expected) {
+                if (entry.replica_first_bad_word == ~0u) {
+                    // Record first corruption for primary-side reporting.
+                    entry.replica_first_bad_word = w;
+                    entry.replica_bad_expected   = expected;
+                    entry.replica_bad_actual      = actual;
+                }
+                std::cerr << "[Replica] tx " << i
+                          << " CORRUPT at word[" << w << "]:"
+                          << " expected 0x" << std::hex << expected
+                          << " got 0x"      << actual   << std::dec << "\n";
+                all_ok = false;
+                break; // report first corruption only; checksum will also fail
+            }
+        }
+
+        // ── Step 4: Verify the FNV-1a checksum over all data words ──────────
+        // This catches any silent corruption not caught by word-level checks.
+        const uint32_t actual_cs = compute_checksum(rec_ptr->data, words_to_check);
+        entry.replica_checksum_actual = actual_cs;
+
+        if (actual_cs != entry.checksum) {
+            std::cerr << "[Replica] tx " << i << " checksum MISMATCH:"
+                      << " expected 0x" << std::hex << entry.checksum
+                      << " got 0x"      << actual_cs << std::dec << "\n";
             all_ok = false;
         } else {
-            std::cout << "[Replica] tx " << i << " OK  checksum=0x"
-                      << std::hex << entry.checksum << std::dec
-                      << "  Memnon segments: " << memnon->segment_count()
-                      << std::endl;
+            std::cout << "[Replica] tx " << i << " OK"
+                      << "  name=" << entry.name
+                      << "  checksum=0x" << std::hex << actual_cs << std::dec
+                      << "  words_checked=" << words_to_check
+                      << "  Memnon_segs=" << memnon->segment_count() << "\n";
         }
     }
 
-    // Signal primary that we're done
+    // ── Signal primary ───────────────────────────────────────────────────────
+    log->replica_result.store(all_ok ? RESULT_OK : RESULT_FAIL,
+                              std::memory_order_release);
     log->replica_done.store(1, std::memory_order_release);
 
     replica_fault->unregister_region(log_region.base_address());
     replica_node.stop();
 
-    if (!all_ok) {
-        std::exit(1);
-    }
+    std::exit(all_ok ? 0 : 1);
 }
 
 // ============================================================================
@@ -356,13 +475,14 @@ TEST(MemnonSegmentedTest, TransactionalGrowthAcrossNodes) {
 
     if (is_replica) {
         run_replica();
-        std::exit(0);
+        // run_replica() calls std::exit(); this line is unreachable.
     }
 
-    // Store exec path for run_primary() to spawn the replica after binding the port.
+    // Store the executable path for run_primary() to spawn the replica
+    // subprocess after the primary socket is bound.
     g_exec_path = args[0];
 
-    // Run the primary. This blocks until the replica acknowledges all transactions.
+    // Blocks until replica_done is set; then asserts replica_result == OK.
     ASSERT_NO_THROW(run_primary());
 
     // Allow the replica process a moment to exit cleanly.
