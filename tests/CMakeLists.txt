@@ -9,6 +9,8 @@ add_executable(geryon_tests
     test_consistency.cpp
     test_correctness.cpp
     test_distributed_sort.cpp
+    test_readonly_replica.cpp
+    test_network_recovery.cpp
 )
 
 target_link_libraries(geryon_tests

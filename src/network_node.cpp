@@ -72,9 +72,12 @@ void NetworkNode::start_primary(uint16_t port) {
     });
 }
 
-void NetworkNode::start_replica(const std::string& host, uint16_t port) {
+void NetworkNode::start_replica(const std::string& host, uint16_t port, bool read_only) {
     if (is_primary_) throw std::runtime_error("Cannot start primary as replica");
     
+    read_only_mode_ = read_only;
+    is_connected_to_primary_ = true;
+
     replica_socket_ = std::make_shared<boost::asio::ip::tcp::socket>(io_context_);
     boost::asio::ip::tcp::resolver resolver(io_context_);
     auto endpoints = resolver.resolve(host, std::to_string(port));
@@ -212,6 +215,7 @@ void NetworkNode::handle_replica_read_header(const boost::system::error_code& er
             boost::system::error_code ec;
             replica_socket_->close(ec);
         }
+        handle_primary_disconnect();
         return;
     }
 
@@ -262,7 +266,9 @@ void NetworkNode::handle_replica_read_data(const boost::system::error_code& erro
     void* io_base = static_cast<char*>(region_->io_address()) + (page_index * page_size);
 
     std::memcpy(io_base, replica_read_buffer_.data(), page_size);
-    region_->set_protection(page_base, page_size, PageProtection::ReadWrite);
+    
+    PageProtection prot = read_only_mode_ ? PageProtection::ReadOnly : PageProtection::ReadWrite;
+    region_->set_protection(page_base, page_size, prot);
 
     bool should_bounce = false;
     {
@@ -327,6 +333,7 @@ void NetworkNode::handle_primary_read_header(uint32_t client_id, const boost::sy
             boost::system::error_code ec;
             clients_[client_id]->close(ec);
         }
+        handle_client_disconnect(client_id);
         return;
     }
 
@@ -375,6 +382,26 @@ void NetworkNode::handle_primary_read_header(uint32_t client_id, const boost::sy
     }
 }
 
+void NetworkNode::process_next_waiter(uint32_t page_index) {
+    uint32_t next_target = 0;
+    bool forward_needed = false;
+    {
+        std::lock_guard<std::mutex> lock(ownership_mutex_);
+        if (!primary_page_waiters_[page_index].empty()) {
+            next_target = primary_page_waiters_[page_index].front();
+            primary_page_waiters_[page_index].pop();
+            primary_page_owner_[page_index] = next_target;
+            forward_needed = true;
+        }
+    }
+    if (forward_needed) {
+        boost::asio::post(io_context_, [this, next_target, page_index]() {
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
+            send_page_data(next_target, page_index);
+        });
+    }
+}
+
 void NetworkNode::handle_primary_read_data(uint32_t client_id, const boost::system::error_code& error, std::size_t) {
     if (error) return;
 
@@ -414,25 +441,8 @@ void NetworkNode::handle_primary_read_data(uint32_t client_id, const boost::syst
             wait_cv_.notify_all();
         }
         
-        // If there are more waiters, primary must immediately send it to the next
-        uint32_t next_target = 0;
-        bool forward_needed = false;
         if (has_more_waiters) {
-            {
-                std::lock_guard<std::mutex> lock(ownership_mutex_);
-                if (!primary_page_waiters_[page_index].empty()) {
-                    next_target = primary_page_waiters_[page_index].front();
-                    primary_page_waiters_[page_index].pop();
-                    primary_page_owner_[page_index] = next_target;
-                    forward_needed = true;
-                }
-            }
-            if (forward_needed) {
-                boost::asio::post(io_context_, [this, next_target, page_index]() {
-                    std::this_thread::sleep_for(std::chrono::microseconds(100));
-                    send_page_data(next_target, page_index);
-                });
-            }
+            process_next_waiter(page_index);
         }
         
         start_primary_read_loop(client_id);
@@ -480,13 +490,29 @@ bool NetworkNode::request_page(void* fault_address) {
     uint32_t page_index = (addr - base) / page_size;
 
     std::unique_lock<std::mutex> lock(wait_mutex_);
+    bool originally_accessible = page_accessible_[page_index];
 
     while (true) {
+        if (is_stopping_) return false;
+
         // Fast-path: another thread already made the page accessible for us.
         // This handles the case where two threads fault on the same page simultaneously
         // (common on macOS with SA_SIGINFO signal delivery).
         if (page_accessible_[page_index]) {
-            region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
+            if (originally_accessible && !is_primary_ && read_only_mode_ && is_connected_to_primary_) {
+                // We have a fault on a page that is ALREADY accessible.
+                // In read_only_mode, this MUST be a write fault because read faults wouldn't happen on a PROT_READ page!
+                // Wait until we are no longer connected to the primary (i.e. it dies)
+                wait_cv_.wait(lock, [this]() { return !is_connected_to_primary_ || is_stopping_; });
+                if (is_stopping_) return false;
+                
+                // Primary is dead! We are promoted!
+                region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
+                return true;
+            }
+
+            PageProtection prot = (!is_primary_ && read_only_mode_ && is_connected_to_primary_) ? PageProtection::ReadOnly : PageProtection::ReadWrite;
+            region_->set_protection(base + (page_index * page_size), page_size, prot);
             return true;
         }
 
@@ -503,9 +529,25 @@ bool NetworkNode::request_page(void* fault_address) {
 
         if (owned) {
             // We own the page but it's not yet marked accessible — make it so.
-            region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
+            PageProtection prot = (!is_primary_ && read_only_mode_ && is_connected_to_primary_) ? PageProtection::ReadOnly : PageProtection::ReadWrite;
+            region_->set_protection(base + (page_index * page_size), page_size, prot);
             page_accessible_[page_index] = true;
             wait_cv_.notify_all(); // Wake any other threads waiting on this page.
+            
+            // If it was a write fault on read-only, loop will catch it on next iteration
+            continue;
+        }
+
+        if (!is_primary_ && !is_connected_to_primary_) {
+            // We are not connected to the primary and we don't own the page!
+            // Recover by mapping locally to prevent crashing, but data is stale/lost
+            region_->set_protection(base + (page_index * page_size), page_size, PageProtection::ReadWrite);
+            page_accessible_[page_index] = true;
+            {
+                std::lock_guard<std::mutex> own_lock(ownership_mutex_);
+                replica_page_owned_[page_index] = true;
+            }
+            wait_cv_.notify_all();
             return true;
         }
 
@@ -530,7 +572,9 @@ bool NetworkNode::request_page(void* fault_address) {
             lock.lock();
         }
 
-        wait_cv_.wait(lock, [this, page_index]() { return page_accessible_[page_index]; });
+        wait_cv_.wait(lock, [this, page_index]() { 
+            return page_accessible_[page_index] || is_stopping_ || (!is_primary_ && !is_connected_to_primary_); 
+        });
     }
 }
 
@@ -754,6 +798,62 @@ void NetworkNode::trigger_synchronization() {
                 send_page_data(0, i);
             }
         }
+    }
+}
+
+void NetworkNode::handle_primary_disconnect() {
+    std::lock_guard<std::mutex> lock(wait_mutex_);
+    if (!is_connected_to_primary_) return;
+    is_connected_to_primary_ = false;
+    
+    if (read_only_mode_) {
+        read_only_mode_ = false; // Promote to ReadWrite
+        
+        // Upgrade all currently accessible pages to ReadWrite
+        std::size_t page_size = MemoryRegion::system_page_size();
+        for (size_t i = 0; i < page_accessible_.size(); ++i) {
+            if (page_accessible_[i]) {
+                void* page_base = static_cast<char*>(region_->base_address()) + (i * page_size);
+                region_->set_protection(page_base, page_size, PageProtection::ReadWrite);
+            }
+        }
+    }
+    
+    wait_cv_.notify_all();
+}
+
+void NetworkNode::handle_client_disconnect(uint32_t client_id) {
+    {
+        std::lock_guard<std::mutex> lock(clients_mutex_);
+        clients_.erase(client_id);
+    }
+    
+    std::lock_guard<std::mutex> lock(ownership_mutex_);
+    for (size_t i = 0; i < primary_page_owner_.size(); ++i) {
+        if (primary_page_owner_[i] == client_id) {
+            primary_page_owner_[i] = 0;
+            
+            void* page_base = static_cast<char*>(region_->base_address()) + (i * MemoryRegion::system_page_size());
+            region_->set_protection(page_base, MemoryRegion::system_page_size(), PageProtection::ReadWrite);
+            
+            {
+                std::lock_guard<std::mutex> wait_lock(wait_mutex_);
+                page_accessible_[i] = true;
+            }
+            wait_cv_.notify_all();
+            
+            process_next_waiter(i);
+        }
+    }
+    
+    for (size_t i = 0; i < primary_page_waiters_.size(); ++i) {
+        std::queue<uint32_t> new_q;
+        while (!primary_page_waiters_[i].empty()) {
+            uint32_t w = primary_page_waiters_[i].front();
+            primary_page_waiters_[i].pop();
+            if (w != client_id) new_q.push(w);
+        }
+        primary_page_waiters_[i] = std::move(new_q);
     }
 }
 
