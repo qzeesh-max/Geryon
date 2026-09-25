@@ -27,6 +27,7 @@ add_library(geryon STATIC
     src/memory_region.cpp
     src/fault_handler.cpp
     src/network_node.cpp
+    src/cluster_state.cpp
 )
 target_include_directories(geryon PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

@@ -91,10 +91,30 @@ private:
     void handle_client_disconnect(uint32_t client_id);
     void process_next_waiter(uint32_t page_index);
     
+    // Protocol state
+    enum class MsgType : uint8_t {
+        PageRequest = 1,
+        PageData = 2,
+        SyncRequest = 3,
+        SyncResponse = 4,
+        Welcome = 5,
+        NodeJoined = 6,
+        NodeLeft = 7
+    };
+    
+    struct __attribute__((packed)) MsgHeader {
+        MsgType type;
+        union {
+            uint32_t page_index;
+            uint32_t node_id; // used by topology messages
+        };
+    };
+
     void send_page_request(uint32_t target_node_id, uint32_t page_index);
     void send_page_data(uint32_t target_node_id, uint32_t page_index);
     void send_sync_request(uint32_t target_node_id);
     void send_sync_response(uint32_t target_node_id);
+    void send_topology_message(uint32_t target_node_id, MsgType type, uint32_t subject_node_id);
 
     MemoryRegion* region_;
     bool is_primary_;
@@ -115,19 +135,6 @@ private:
     std::unordered_map<uint32_t, std::unique_ptr<std::mutex>> client_write_mutexes_;
 
     std::thread io_thread_;
-
-    // Protocol state
-    enum class MsgType : uint8_t {
-        PageRequest = 1,
-        PageData = 2,
-        SyncRequest = 3,
-        SyncResponse = 4
-    };
-    
-    struct __attribute__((packed)) MsgHeader {
-        MsgType type;
-        uint32_t page_index;
-    };
 
     // Replica read buffers
     MsgHeader replica_read_header_;

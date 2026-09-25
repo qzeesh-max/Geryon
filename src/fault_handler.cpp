@@ -293,7 +293,7 @@ private:
 
         // Start the worker thread.
         running_.store(true, std::memory_order_release);
-        worker_ = std::thread([this]() { worker_loop(); });
+        worker_ = new std::thread([this]() { worker_loop(); });
 
         pthread_atfork(nullptr, nullptr, []() {
             GlobalFaultHandler::instance().reinit_after_fork();
@@ -313,14 +313,15 @@ private:
         }
 
         running_.store(true, std::memory_order_release);
-        worker_ = std::thread([this]() { worker_loop(); });
+        worker_ = new std::thread([this]() { worker_loop(); });
     }
 
     ~GlobalFaultHandler() {
         running_.store(false, std::memory_order_release);
         close(pipe_write_fd_);
         close(pipe_read_fd_);
-        if (worker_.joinable()) worker_.join();
+        if (worker_ && worker_->joinable()) worker_->join();
+        delete worker_;
     }
 
     void install_handler_once() {
@@ -428,7 +429,7 @@ private:
 
     std::atomic<bool> handler_installed_{false};
     std::atomic<bool> running_{false};
-    std::thread       worker_;
+    std::thread*      worker_{nullptr};
 
     struct sigaction old_segv_action_{};
     struct sigaction old_bus_action_{};

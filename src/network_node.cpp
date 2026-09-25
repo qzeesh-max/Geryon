@@ -18,6 +18,7 @@
 
 #include "geryon/network_node.hpp"
 #include "geryon/memory_region.hpp"
+#include "geryon/cluster_state.hpp"
 #include <iostream>
 
 #ifdef _WIN32
@@ -54,6 +55,8 @@ NetworkNode::~NetworkNode() {
 void NetworkNode::start_primary(uint16_t port) {
     if (!is_primary_) throw std::runtime_error("Cannot start replica as primary");
     
+    cluster::internal::set_local_node_id(0);
+
     boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
     acceptor_ = std::make_unique<boost::asio::ip::tcp::acceptor>(io_context_);
     acceptor_->open(endpoint.protocol());
@@ -185,6 +188,32 @@ void NetworkNode::accept_connection() {
             }
             primary_read_buffers_[client_id].resize(MemoryRegion::system_page_size());
             
+            cluster::internal::add_active_node(client_id);
+            
+            std::vector<uint32_t> existing_clients;
+            {
+                std::lock_guard<std::mutex> lock(clients_mutex_);
+                for (const auto& pair : clients_) {
+                    if (pair.first != client_id) {
+                        existing_clients.push_back(pair.first);
+                    }
+                }
+            }
+
+            // Send Welcome to new client
+            send_topology_message(client_id, MsgType::Welcome, client_id);
+
+            // Announce Primary to new client
+            send_topology_message(client_id, MsgType::NodeJoined, 0);
+
+            // Send NodeJoined exchanges
+            for (uint32_t other_id : existing_clients) {
+                // Tell other client about the new client
+                send_topology_message(other_id, MsgType::NodeJoined, client_id);
+                // Tell the new client about the other client
+                send_topology_message(client_id, MsgType::NodeJoined, other_id);
+            }
+
             std::cout << "Replica " << client_id << " connected." << std::endl;
             start_primary_read_loop(client_id);
             
@@ -247,6 +276,15 @@ void NetworkNode::handle_replica_read_header(const boost::system::error_code& er
             std::lock_guard<std::mutex> lock(wait_mutex_);
             sync_cv_.notify_all();
         }
+        start_replica_read_loop();
+    } else if (replica_read_header_.type == MsgType::Welcome) {
+        cluster::internal::set_local_node_id(ntohl(replica_read_header_.node_id));
+        start_replica_read_loop();
+    } else if (replica_read_header_.type == MsgType::NodeJoined) {
+        cluster::internal::add_active_node(ntohl(replica_read_header_.node_id));
+        start_replica_read_loop();
+    } else if (replica_read_header_.type == MsgType::NodeLeft) {
+        cluster::internal::remove_active_node(ntohl(replica_read_header_.node_id));
         start_replica_read_loop();
     } else if (replica_read_header_.type == MsgType::PageData) {
         boost::asio::async_read(*replica_socket_,
@@ -770,6 +808,21 @@ void NetworkNode::send_sync_response(uint32_t target_node_id) {
     }
 }
 
+void NetworkNode::send_topology_message(uint32_t target_node_id, MsgType type, uint32_t subject_node_id) {
+    auto header = std::make_shared<MsgHeader>();
+    header->type = type;
+    header->node_id = htonl(subject_node_id);
+    
+    boost::system::error_code ec;
+    if (!is_primary_) {
+        std::lock_guard<std::mutex> lock(replica_socket_write_mutex_);
+        boost::asio::write(*replica_socket_, boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+    } else {
+        std::lock_guard<std::mutex> lock(*client_write_mutexes_[target_node_id]);
+        boost::asio::write(*clients_[target_node_id], boost::asio::buffer(header.get(), sizeof(MsgHeader)), ec);
+    }
+}
+
 void NetworkNode::trigger_synchronization() {
     std::size_t num_pages = region_->size() / MemoryRegion::system_page_size();
     if (is_primary_) {
@@ -805,6 +858,7 @@ void NetworkNode::handle_primary_disconnect() {
     std::lock_guard<std::mutex> lock(wait_mutex_);
     if (!is_connected_to_primary_) return;
     is_connected_to_primary_ = false;
+    cluster::internal::clear_active_nodes();
     
     if (read_only_mode_) {
         read_only_mode_ = false; // Promote to ReadWrite
@@ -829,7 +883,30 @@ void NetworkNode::handle_primary_disconnect() {
 void NetworkNode::handle_client_disconnect(uint32_t client_id) {
     {
         std::lock_guard<std::mutex> lock(clients_mutex_);
+        for (const auto& pair : clients_) {
+            if (pair.first != client_id) {
+                // We use async writes via send_topology_message, but wait,
+                // we shouldn't hold the mutex while doing write operations if possible,
+                // but send_topology_message grabs its own lock.
+            }
+        }
+    }
+    
+    // Announce to remaining clients
+    std::vector<uint32_t> remaining_clients;
+    {
+        std::lock_guard<std::mutex> lock(clients_mutex_);
+        for (const auto& pair : clients_) {
+            if (pair.first != client_id) remaining_clients.push_back(pair.first);
+        }
         clients_.erase(client_id);
+    }
+    
+    // Update local cluster state tracking
+    cluster::internal::remove_active_node(client_id);
+
+    for (uint32_t other : remaining_clients) {
+        send_topology_message(other, MsgType::NodeLeft, client_id);
     }
     
     std::lock_guard<std::mutex> lock(ownership_mutex_);

@@ -11,10 +11,12 @@ Geryon supports integration with existing memory mapping and interprocess commun
 
 *   **Cross-Platform Architecture:** Native implementations for macOS/iOS (Mach exception handling), Linux (sigaction + mprotect), and Windows (Vectored Exception Handling + VirtualAlloc).
 *   **Transparent Page Fault Synchronization:** Geryon traps segmentation faults (soft faults) natively and orchestrates "Bouncing Ownership" page retrieval over TCP sockets, completely transparent to the accessing threads.
-*   **Distributed Concurrency Control:** Includes a custom `geryon::recursive_spin_lock` which natively supports network backoff, mitigating lock starvation when pages rapidly bounce between nodes.
+*   **Distributed Concurrency Control:** Includes custom spin locks natively designed for distributed settings:
+    *   `geryon::recursive_spin_lock`: Mitigates lock starvation via network backoff when pages rapidly bounce between nodes.
+    *   `geryon::robust_spin_lock`: Cluster-aware robust lock that tracks node liveness, automatically breaking locks held by dead or partitioned nodes without manual intervention.
 *   **Manual State Synchronization:** Forces cache consistency by manually flushing pages from replicas back to the primary, paired with a graceful connection teardown handshake.
 *   **Read-Only Replicas & Failover:** Supports operating replicas in a read-only mode, with automated wait-for-failover behavior and custom callbacks when primary connections drop.
-*   **Third-Party Allocator Integration:** Easily drop-in advanced memory managers (e.g., `boost::interprocess` managed segments) and let Geryon handle the synchronization underneath.
+*   **Third-Party Allocator Integration:** Easily drop-in advanced memory managers (e.g., `boost::interprocess` managed segments) and let Geryon handle the synchronization underneath. Includes built-in support for [Memnon's](https://github.com/qzeesh-max/Memnon) Segmented Managed Memory architectures to support dynamic transactional growth of shared memory pools across nodes seamlessly.
 
 ## Architecture
 
@@ -131,7 +133,7 @@ Geryon comes with a comprehensive, deterministic 15-test suite designed to valid
   - Windows 10 via CrossOver (`mingw-w64`) using Vectored Exception Handling (VEH).
   - Linux Native via Docker (`ubuntu:24.04`) using `sigaction` and self-pipe thread synchronization.
 - Tests simulate massive fault contention, validating correct queue processing for **Distributed Shared Memory Thrashing** and resolving edge cases where >60 threads aggressively request the same page memory address.
-- Comprehensive coverage of cross-process shared memory objects (`InterprocessTest`), Memory segment mapping, Spin Locks (`SynchronizationTest`), Node disconnects, fault handler thread-safety, and distributed piecewise processing over segmented memory (`DistributedSortTest`).
+- Comprehensive coverage of cross-process shared memory objects (`InterprocessTest`), Memory segment mapping, Spin Locks (`SynchronizationTest`), Node disconnects, fault handler thread-safety, Memnon Segmented Memory mapping (`MemnonSegmentedTest`), and distributed piecewise processing over segmented memory (`DistributedSortTest`).
 
 ## Getting Started
 ### Prerequisites
@@ -211,13 +213,13 @@ replica_node.start_replica("192.168.1.10", 12345); // Connects to Primary
 
 ### 3. Distributed Synchronization
 
-To synchronize access across the distributed memory, construct a `geryon::recursive_spin_lock` natively inside the memory region.
+To synchronize access across the distributed memory, construct a `geryon::robust_spin_lock` natively inside the memory region. It guarantees that if a node crashes or disconnects while holding the lock, the lock will automatically be broken to prevent cluster-wide deadlocks!
 
 ```cpp
-#include <geryon/recursive_spin_lock.hpp>
+#include <geryon/robust_spin_lock.hpp>
 
 struct SharedState {
-    geryon::recursive_spin_lock lock;
+    geryon::robust_spin_lock lock;
     int data;
 };
 
@@ -226,7 +228,12 @@ SharedState* state = new (region.base_address()) SharedState();
 
 // Replica accesses it normally!
 SharedState* state = reinterpret_cast<SharedState*>(region.base_address());
-state->lock.lock();
+auto status = state->lock.lock();
+if (status == geryon::LockStatus::OWNER_DIED) {
+    // The previous lock owner died before releasing it!
+    // Time to recover or fix any corrupted data structure state...
+}
+
 state->data++;
 state->lock.unlock();
 ```
