@@ -145,7 +145,7 @@ TEST(DistributedSortTest, MultiprocessPiecewiseSort) {
     for (int i = 1; i <= NUM_REPLICAS; ++i) {
         process_waiters.emplace_back([=]() {
 #ifdef _WIN32
-            std::string cmd = exec_path + " --gtest_filter=DistributedSortTest.MultiprocessPiecewiseSort --run_as_replica"
+            std::string cmd = "\"" + exec_path + "\" --gtest_filter=DistributedSortTest.MultiprocessPiecewiseSort --run_as_replica"
                             + " --replica_port=" + std::to_string(port)
                             + " --replica_index=" + std::to_string(i);
             STARTUPINFOA si;

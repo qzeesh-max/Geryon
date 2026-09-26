@@ -224,7 +224,7 @@ static void run_primary() {
 
     // ── Spawn replica subprocess ─────────────────────────────────────────────
     extern std::string g_exec_path;
-    std::string cmd = g_exec_path
+    std::string cmd = "\"" + g_exec_path + "\""
         + " --gtest_filter=MemnonSegmentedTest.TransactionalGrowthAcrossNodes"
         + " --run_as_memnon_replica";
 

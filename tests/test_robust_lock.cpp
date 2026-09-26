@@ -119,7 +119,7 @@ TEST_F(RobustLockTest, LockRecoveryAfterCrash) {
     new (state) SharedState();
     state->data = 0;
 
-    std::string cmd = exec_path + " --gtest_filter=RobustLockTest.LockRecoveryAfterCrash --run_as_robust_lock_replica --replica_port=" + std::to_string(port);
+    std::string cmd = "\"" + exec_path + "\" --gtest_filter=RobustLockTest.LockRecoveryAfterCrash --run_as_robust_lock_replica --replica_port=" + std::to_string(port);
 
 #ifdef _WIN32
     STARTUPINFOA si;
