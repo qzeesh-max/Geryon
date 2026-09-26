@@ -21,6 +21,7 @@
 #include "geryon/network_node.hpp"
 #include "geryon/fault_handler.hpp"
 #include "geryon/recursive_spin_lock.hpp"
+#include "geryon/synchronization.hpp"
 #include <thread>
 #include <chrono>
 #include <atomic>
@@ -31,6 +32,15 @@ struct SharedState {
     recursive_spin_lock lock;
     int counter;
 };
+
+// Dummy test to ensure new sync primitives compile
+TEST(SynchronizationTest, CompileCheck) {
+    sync::ticket_lock tlock;
+    sync::epoch_lock elock;
+    sync::mcs_lock mlock;
+    
+    EXPECT_TRUE(true);
+}
 
 TEST(SynchronizationTest, DistributedSpinLock) {
     std::size_t size = MemoryRegion::system_page_size();

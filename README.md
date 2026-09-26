@@ -213,13 +213,18 @@ replica_node.start_replica("192.168.1.10", 12345); // Connects to Primary
 
 ### 3. Distributed Synchronization
 
-To synchronize access across the distributed memory, construct a `geryon::robust_spin_lock` natively inside the memory region. It guarantees that if a node crashes or disconnects while holding the lock, the lock will automatically be broken to prevent cluster-wide deadlocks!
+To synchronize access across the distributed memory, Geryon provides several highly robust, cluster-aware synchronization primitives in `<geryon/synchronization.hpp>`. These primitives guarantee that if a node crashes or disconnects while holding the lock, the lock will automatically be broken or stolen to prevent cluster-wide deadlocks!
+
+- **`robust_spin_lock`**: A simple Test-and-Set lock. Fast for low contention.
+- **`robust_ticket_lock`**: A Bakery-algorithm ticket lock providing strict FIFO fairness. Dead nodes in the queue are automatically skipped.
+- **`robust_epoch_lock`**: A heartbeat-based lock suitable for long-running critical sections. The lock is forcibly stolen if the owner fails to heartbeat.
+- **`robust_mcs_lock`**: A highly scalable Queue-Based Spin Lock (MCS). Each node spins on its own local memory segment, virtually eliminating cache-coherence storms over the network.
 
 ```cpp
-#include <geryon/robust_spin_lock.hpp>
+#include <geryon/synchronization.hpp>
 
 struct SharedState {
-    geryon::robust_spin_lock lock;
+    geryon::sync::mcs_lock lock;
     int data;
 };
 
@@ -229,7 +234,7 @@ SharedState* state = new (region.base_address()) SharedState();
 // Replica accesses it normally!
 SharedState* state = reinterpret_cast<SharedState*>(region.base_address());
 auto status = state->lock.lock();
-if (status == geryon::LockStatus::OWNER_DIED) {
+if (status == geryon::robust_lock_status::owner_died) {
     // The previous lock owner died before releasing it!
     // Time to recover or fix any corrupted data structure state...
 }
