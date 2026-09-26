@@ -105,7 +105,7 @@ TEST_F(RobustLockTest, LockRecoveryAfterCrash) {
         if (arg == "--run_as_robust_lock_replica") {
             is_replica = true;
         } else if (arg.find("--replica_port=") == 0) {
-            replica_port = std::stoi(arg.substr(13));
+            replica_port = std::stoi(arg.substr(15));
         }
     }
 

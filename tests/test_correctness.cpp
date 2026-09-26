@@ -184,7 +184,7 @@ TEST(CorrectnessTest, MultiprocessMultipageCorrectness) {
         if (arg == "--run_as_replica") {
             is_replica = true;
         } else if (arg.find("--replica_port=") == 0) {
-            replica_port = static_cast<uint16_t>(std::stoi(arg.substr(13)));
+            replica_port = static_cast<uint16_t>(std::stoi(arg.substr(15)));
         }
     }
 

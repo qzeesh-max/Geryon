@@ -118,9 +118,9 @@ TEST_P(RobustSyncTest, RecoveryAfterCrashOrTimeout) {
         if (arg == "--run_as_robust_sync_replica") {
             is_replica = true;
         } else if (arg.find("--replica_port=") == 0) {
-            replica_port = std::stoi(arg.substr(13));
+            replica_port = std::stoi(arg.substr(15));
         } else if (arg.find("--replica_case=") == 0) {
-            replica_case = std::stoi(arg.substr(13));
+            replica_case = std::stoi(arg.substr(15));
         }
     }
 

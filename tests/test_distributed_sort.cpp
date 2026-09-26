@@ -107,9 +107,9 @@ TEST(DistributedSortTest, MultiprocessPiecewiseSort) {
         if (arg == "--run_as_replica") {
             is_replica = true;
         } else if (arg.find("--replica_port=") == 0) {
-            replica_port = static_cast<uint16_t>(std::stoi(arg.substr(13)));
+            replica_port = static_cast<uint16_t>(std::stoi(arg.substr(15)));
         } else if (arg.find("--replica_index=") == 0) {
-            replica_index = std::stoi(arg.substr(14));
+            replica_index = std::stoi(arg.substr(16));
         }
     }
 
@@ -119,7 +119,7 @@ TEST(DistributedSortTest, MultiprocessPiecewiseSort) {
     }
 
     std::size_t region_size = ((sizeof(SortState) + MemoryRegion::system_page_size() - 1) / MemoryRegion::system_page_size()) * MemoryRegion::system_page_size();
-    uint16_t port = 15685;
+    uint16_t port = 15685 + (std::chrono::system_clock::now().time_since_epoch().count() % 1000);
 
     MemoryRegion primary_region(region_size);
     primary_region.set_protection(primary_region.base_address(), region_size, PageProtection::ReadWrite);
