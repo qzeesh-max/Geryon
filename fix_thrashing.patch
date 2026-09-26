@@ -1,0 +1,27 @@
+--- src/network_node.cpp
++++ src/network_node.cpp
+@@ -268,6 +268,8 @@
+         if (is_first_waiter) {
+             if (current_owner == 0) {
+                 // Primary currently owns it, send to replica
++                // Delay slightly to prevent live-lock thrashing
++                std::this_thread::sleep_for(std::chrono::microseconds(100));
+                 send_page_data(client_id, page_index);
+             } else {
+                 // Another replica owns it, request it
+@@ -345,6 +347,7 @@
+                 }
+             }
+             if (forward_needed) {
++                std::this_thread::sleep_for(std::chrono::microseconds(100));
+                 send_page_data(next_target, page_index);
+             }
+         }
+@@ -226,6 +229,7 @@
+ 
+         if (should_send) {
+             // Give up ownership and send to Primary
++            std::this_thread::sleep_for(std::chrono::microseconds(100));
+             send_page_data(0, page_index);
+         }
+         start_replica_read_loop();

@@ -93,7 +93,7 @@ static constexpr int      kNumTransactions = 6;
 // Each DataRecord is ~480 KB; with 6 records we exceed the 1 MiB initial
 // Memnon segment, forcing it to grow across multiple sub-segments.
 static constexpr uint32_t kPayloadWords    = 120'000;
-static const char*        kMemnonShmName   = "geryon_memnon_txlog_test";
+// The SHM name is passed dynamically to avoid conflicts
 
 // ============================================================================
 // DataRecord — lives inside the Memnon segmented shared memory
@@ -214,7 +214,11 @@ static void run_primary() {
     // ── Memnon segmented SHM (creator) ──────────────────────────────────────
     // Start at kMinSegmentSize (1 MiB) so we force growth after the first
     // DataRecord allocation (~480 KB * 2 > 1 MiB).
-    si::segmented_managed_memory memnon(kMemnonShmName, si::create_only,
+    // Generate a random dynamic SHM name to avoid lingering file conflicts
+    auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+    std::string shm_name = "geryon_memnon_test_" + std::to_string(now) + "_" + std::to_string(std::rand());
+
+    si::segmented_managed_memory memnon(shm_name.c_str(), si::create_only,
                                         si::kMinSegmentSize);
     std::cout << "[Primary] Memnon created — segments: " << memnon.segment_count()
               << "  size: " << memnon.get_size() << " B\n";
@@ -226,7 +230,7 @@ static void run_primary() {
     extern std::string g_exec_path;
     std::string cmd = "\"" + g_exec_path + "\""
         + " --gtest_filter=MemnonSegmentedTest.TransactionalGrowthAcrossNodes"
-        + " --run_as_memnon_replica";
+        + " --run_as_memnon_replica --shm_name=" + shm_name;
 
 #ifdef _WIN32
     STARTUPINFOA si;
@@ -325,7 +329,7 @@ static void run_primary() {
 // Replica process logic
 // ============================================================================
 
-static void run_replica() {
+static void run_replica(const std::string& shm_name) {
     // ── Geryon log region ────────────────────────────────────────────────────
     const std::size_t log_size = page_align(sizeof(TransactionLog));
     MemoryRegion log_region(log_size);
@@ -344,8 +348,13 @@ static void run_replica() {
 
     // Wait for primary to signal that both the primary socket and the Memnon
     // SHM have been created before we try to open them.
+    auto start_wait = std::chrono::steady_clock::now();
     while (log->primary_ready.load(std::memory_order_acquire) == 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        if (std::chrono::steady_clock::now() - start_wait > std::chrono::seconds(10)) {
+            std::cerr << "[Replica] Timed out waiting for primary_ready" << std::endl;
+            std::exit(1);
+        }
     }
 
     // ── Open Memnon SHM (opener side) ───────────────────────────────────────
@@ -353,7 +362,7 @@ static void run_replica() {
     for (int attempt = 0; attempt < 40; ++attempt) {
         try {
             memnon = std::make_unique<si::segmented_managed_memory>(
-                kMemnonShmName, si::open_only);
+                shm_name.c_str(), si::open_only);
             break;
         } catch (...) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -489,7 +498,13 @@ TEST(MemnonSegmentedTest, TransactionalGrowthAcrossNodes) {
     }
 
     if (is_replica) {
-        run_replica();
+        std::string shm_name = "geryon_memnon_txlog_test";
+        for (const auto& arg : args) {
+            if (arg.find("--shm_name=") == 0) {
+                shm_name = arg.substr(11);
+            }
+        }
+        run_replica(shm_name);
         // run_replica() calls std::exit(); this line is unreachable.
     }
 

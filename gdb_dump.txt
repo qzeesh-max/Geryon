@@ -1,0 +1,34 @@
+[New LWP 140]
+[New LWP 139]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+0x0000e07ab01cbd90 in __GI___clock_nanosleep (clock_id=<optimized out>, clock_id@entry=0, flags=flags@entry=0, req=0xfffff02f3220, rem=0xfffff02f3220) at ../sysdeps/unix/sysv/linux/clock_nanosleep.c:78
+
+Thread 3 (Thread 0xe07aa66d9160 (LWP 139) "geryon_tests"):
+#0  0x0000e07ab01f0bdc in __GI___poll (fds=0xe07aa66d8780, nfds=1, timeout=<optimized out>) at ../sysdeps/unix/sysv/linux/poll.c:41
+#1  0x0000ca181190828c in geryon::FaultHandlerUffd::handler_loop() ()
+#2  0x0000e07ab04a1ae0 in ?? () from /lib/aarch64-linux-gnu/libstdc++.so.6
+#3  0x0000e07ab019582c [PAC] in start_thread (arg=0xe07ab0688760) at ./nptl/pthread_create.c:447
+#4  0x0000e07ab01fbb4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 2 (Thread 0xe07aa5ec9160 (LWP 140) "geryon_tests"):
+#0  0x0000e07ab01fbe74 in __GI_epoll_pwait (epfd=6, events=0xe07aa5ec7e48, maxevents=128, timeout=-1, set=0x0) at ../sysdeps/unix/sysv/linux/epoll_pwait.c:40
+#1  0x0000ca1811917b38 in boost::asio::detail::epoll_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) ()
+#2  0x0000ca181190a2bc in boost::asio::detail::scheduler::run(boost::system::error_code&) [clone .isra.0] ()
+#3  0x0000ca181190a840 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_primary(unsigned short)::{lambda()#1}> > >::_M_run() ()
+#4  0x0000e07ab04a1ae0 in ?? () from /lib/aarch64-linux-gnu/libstdc++.so.6
+#5  0x0000e07ab019582c [PAC] in start_thread (arg=0xe07ab0688760) at ./nptl/pthread_create.c:447
+#6  0x0000e07ab01fbb4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 1 (Thread 0xe07ab0688020 (LWP 138) "geryon_tests"):
+#0  0x0000e07ab01cbd90 in __GI___clock_nanosleep (clock_id=<optimized out>, clock_id@entry=0, flags=flags@entry=0, req=0xfffff02f3220, rem=0xfffff02f3220) at ../sysdeps/unix/sysv/linux/clock_nanosleep.c:78
+#1  0x0000e07ab01d60bc in __GI___nanosleep (req=<optimized out>, rem=<optimized out>) at ../sysdeps/unix/sysv/linux/nanosleep.c:25
+#2  0x0000ca1811906068 in DistributedSortTest_MultiprocessPiecewiseSort_Test::TestBody() ()
+#3  0x0000ca181195e9b0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) ()
+#4  0x0000ca181194d614 in testing::Test::Run() [clone .part.0] ()
+#5  0x0000ca181194d9d0 in testing::TestInfo::Run() ()
+#6  0x0000ca181194dfb8 in testing::TestSuite::Run() [clone .part.0] ()
+#7  0x0000ca1811954a80 in testing::internal::UnitTestImpl::RunAllTests() ()
+#8  0x0000ca181194e13c in testing::UnitTest::Run() ()
+#9  0x0000ca18118e30b0 in main ()
+[Inferior 1 (process 138) detached]

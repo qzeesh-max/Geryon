@@ -1,0 +1,184 @@
+Running Windows test suite via CrossOver (bottle: 'Windows 10')...
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+[==========] Running 19 tests from 14 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from RobustLockTest
+[ RUN      ] RobustLockTest.LockRecoveryAfterCrash
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = RobustLockTest.LockRecoveryAfterCrash
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from RobustLockTest
+[ RUN      ] RobustLockTest.LockRecoveryAfterCrash
+Replica 1 connected.
+Replica node ID: 1
+Replica acquired lock. Simulating crash (infinite loop)...
+Primary killing replica process...
+robust_spin_lock: breaking lock held by dead node 1
+[       OK ] RobustLockTest.LockRecoveryAfterCrash (927 ms)
+[----------] 1 test from RobustLockTest (927 ms total)
+
+[----------] 1 test from MemnonSegmentedTest
+[ RUN      ] MemnonSegmentedTest.TransactionalGrowthAcrossNodes
+[Primary] Listening on port 15780
+/Users/zeeshanqazi/Desktop/projects/Geryon/tests/test_memnon_segmented.cpp:501: Failure
+Expected: run_primary() doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "segmented_segment_manager: failed to map SHM chunk".
+
+[  FAILED  ] MemnonSegmentedTest.TransactionalGrowthAcrossNodes (6 ms)
+[----------] 1 test from MemnonSegmentedTest (6 ms total)
+
+[----------] 1 test from NetworkRecoveryTest
+[ RUN      ] NetworkRecoveryTest.PrimaryRecoversWhenReplicaDisconnects
+Replica 1 connected.
+[       OK ] NetworkRecoveryTest.PrimaryRecoversWhenReplicaDisconnects (611 ms)
+[----------] 1 test from NetworkRecoveryTest (611 ms total)
+
+[----------] 1 test from ReadOnlyReplicaTest
+[ RUN      ] ReadOnlyReplicaTest.ReplicaReadsOnlyUntilPrimaryDies
+Replica 1 connected.
+[       OK ] ReadOnlyReplicaTest.ReplicaReadsOnlyUntilPrimaryDies (2220 ms)
+[----------] 1 test from ReadOnlyReplicaTest (2220 ms total)
+
+[----------] 1 test from DistributedSortTest
+[ RUN      ] DistributedSortTest.MultiprocessPiecewiseSort
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = DistributedSortTest.MultiprocessPiecewiseSort
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DistributedSortTest
+[ RUN      ] DistributedSortTest.MultiprocessPiecewiseSort
+Replica 1 connected.
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = DistributedSortTest.MultiprocessPiecewiseSort
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DistributedSortTest
+[ RUN      ] DistributedSortTest.MultiprocessPiecewiseSort
+Replica 2 connected.
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = DistributedSortTest.MultiprocessPiecewiseSort
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DistributedSortTest
+[ RUN      ] DistributedSortTest.MultiprocessPiecewiseSort
+Replica 3 connected.
+[Primary] Pages Sent: 14660, Pages Received: 14659 | Avg Transfer Time: 83.3384 us | Avg Time Between Transfers: 1213.56 us
+[Replica 1] Pages Sent: 6882, Pages Received: 6883 | Avg Transfer Time: 77.0436 us | Avg Time Between Transfers: 6733.97 us
+[Replica 3] Pages Sent: 6891, Pages Received: 6892 | Avg Transfer Time: 81.4771 us | Avg Time Between Transfers: 6712.95 us
+[Replica 2] Pages Sent: 6882, Pages Received: 6883 | Avg Transfer Time: 80.2605 us | Avg Time Between Transfers: 6730.88 us
+[       OK ] DistributedSortTest.MultiprocessPiecewiseSort (47583 ms)
+[----------] 1 test from DistributedSortTest (47583 ms total)
+
+[----------] 2 tests from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultithreadMultipageCorrectness
+Replica 1 connected.
+Replica 2 connected.
+Replica 3 connected.
+[       OK ] CorrectnessTest.MultithreadMultipageCorrectness (3668 ms)
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = CorrectnessTest.MultiprocessMultipageCorrectness
+Note: Google Test filter = CorrectnessTest.MultiprocessMultipageCorrectness
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CorrectnessTest
+[----------] 1 test from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+Replica 1 connected.
+Replica 2 connected.
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = CorrectnessTest.MultiprocessMultipageCorrectness
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CorrectnessTest
+[ RUN      ] CorrectnessTest.MultiprocessMultipageCorrectness
+Replica 3 connected.
+[       OK ] CorrectnessTest.MultiprocessMultipageCorrectness (1164 ms)
+[----------] 2 tests from CorrectnessTest (4832 ms total)
+
+[----------] 3 tests from ConsistencyTest
+[ RUN      ] ConsistencyTest.TriggerSynchronization
+Starting primary...
+Primary started.
+Starting replica...
+Replica 1 connected.
+Replica started.
+Simulating replica page request 1
+Simulating replica page request 2
+Replica writing to pages
+Primary triggering synchronization
+Primary checking consistency
+Stopping nodes
+Test complete
+[       OK ] ConsistencyTest.TriggerSynchronization (2177 ms)
+[ RUN      ] ConsistencyTest.ReplicaStopFlushesData
+Replica 1 connected.
+[       OK ] ConsistencyTest.ReplicaStopFlushesData (165 ms)
+[ RUN      ] ConsistencyTest.PrimaryStopInitiatesHandshake
+Replica 1 connected.
+[       OK ] ConsistencyTest.PrimaryStopInitiatesHandshake (2066 ms)
+[----------] 3 tests from ConsistencyTest (4410 ms total)
+
+[----------] 1 test from MemnonIntegrationTest
+[ RUN      ] MemnonIntegrationTest.SegmentedInterprocess
+Replica 1 connected.
+[       OK ] MemnonIntegrationTest.SegmentedInterprocess (2148 ms)
+[----------] 1 test from MemnonIntegrationTest (2149 ms total)
+
+[----------] 1 test from InterprocessTest
+[ RUN      ] InterprocessTest.SharedVector
+Replica 1 connected.
+[       OK ] InterprocessTest.SharedVector (2121 ms)
+[----------] 1 test from InterprocessTest (2122 ms total)
+
+[----------] 1 test from SynchronizationTest
+[ RUN      ] SynchronizationTest.DistributedSpinLock
+Replica 1 connected.
+Primary finished.
+Replica finished.
+[       OK ] SynchronizationTest.DistributedSpinLock (3113 ms)
+[----------] 1 test from SynchronizationTest (3113 ms total)
+
+[----------] 1 test from MultiClientTest
+[ RUN      ] MultiClientTest.StarTopologyBouncing
+Replica 1 connected.
+Replica 2 connected.
+Replica 3 connected.
+[       OK ] MultiClientTest.StarTopologyBouncing (7190 ms)
+[----------] 1 test from MultiClientTest (7190 ms total)
+
+[----------] 2 tests from NetworkSyncTest
+[ RUN      ] NetworkSyncTest.BouncingOwnership
+Replica 1 connected.
+[       OK ] NetworkSyncTest.BouncingOwnership (2118 ms)
+[ RUN      ] NetworkSyncTest.StressTest
+Replica 1 connected.
+[       OK ] NetworkSyncTest.StressTest (2168 ms)
+[----------] 2 tests from NetworkSyncTest (4288 ms total)
+
+[----------] 1 test from FaultHandlerTest
+[ RUN      ] FaultHandlerTest.SoftFaultHandling
+[       OK ] FaultHandlerTest.SoftFaultHandling (1 ms)
+[----------] 1 test from FaultHandlerTest (1 ms total)
+
+[----------] 2 tests from MemoryRegionTest
+[ RUN      ] MemoryRegionTest.AllocationAndPageSize
+[       OK ] MemoryRegionTest.AllocationAndPageSize (0 ms)
+[ RUN      ] MemoryRegionTest.ProtectionChanges
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+Running main() from /Users/zeeshanqazi/Desktop/projects/Geryon/build-windows/_deps/googletest-src/googletest/src/gtest_main.cc
+[       OK ] MemoryRegionTest.ProtectionChanges (173 ms)
+[----------] 2 tests from MemoryRegionTest (175 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 14 test suites ran. (79638 ms total)
+[  PASSED  ] 18 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MemnonSegmentedTest.TransactionalGrowthAcrossNodes
+
+ 1 FAILED TEST

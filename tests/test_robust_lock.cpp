@@ -107,8 +107,14 @@ TEST_F(RobustLockTest, LockRecoveryAfterCrash) {
     }
 
     if (is_replica) {
-        run_replica_that_grabs_lock(replica_port);
-        std::exit(0);
+        try {
+            run_replica_that_grabs_lock(replica_port);
+        } catch (const std::exception& e) {
+            std::cerr << "Replica crashed with exception: " << e.what() << std::endl;
+        } catch (...) {
+            std::cerr << "Replica crashed with unknown exception" << std::endl;
+        }
+        std::exit(1);
     }
 
     std::string exec_path = args[0];

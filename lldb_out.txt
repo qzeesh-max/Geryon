@@ -1,0 +1,163 @@
+(lldb) process attach --pid 6898
+Process 6898 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+    frame #0: 0x000000018a756af4 libsystem_kernel.dylib`__ulock_wait + 8
+libsystem_kernel.dylib`__ulock_wait:
+->  0x18a756af4 <+8>:  b.lo   0x18a756b14               ; <+40>
+    0x18a756af8 <+12>: pacibsp 
+    0x18a756afc <+16>: stp    x29, x30, [sp, #-0x10]!
+    0x18a756b00 <+20>: mov    x29, sp
+Target 0: (geryon_tests) stopped.
+Executable binary set to "/Users/zeeshanqazi/Desktop/projects/Geryon/build/tests/geryon_tests".
+Architecture set to: arm64-apple-macosx-.
+(lldb) thread backtrace all
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+  * frame #0: 0x000000018a756af4 libsystem_kernel.dylib`__ulock_wait + 8
+    frame #1: 0x000000018a79c03c libsystem_pthread.dylib`_pthread_join + 620
+    frame #2: 0x0000000102fa78ac libstdc++.6.dylib`std::thread::join() + 32
+    frame #3: 0x000000010283fd88 geryon_tests`CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody() + 996
+    frame #4: 0x000000010288b9e4 geryon_tests`void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) + 68
+    frame #5: 0x000000010288bcc4 geryon_tests`testing::Test::Run() (.part.0) + 420
+    frame #6: 0x000000010288c11c geryon_tests`testing::TestInfo::Run() + 604
+    frame #7: 0x000000010288da74 geryon_tests`testing::TestSuite::Run() (.part.0) + 500
+    frame #8: 0x0000000102892c10 geryon_tests`testing::internal::UnitTestImpl::RunAllTests() + 2536
+    frame #9: 0x00000001028931a0 geryon_tests`testing::UnitTest::Run() + 96
+    frame #10: 0x00000001028942a0 geryon_tests`main + 64
+    frame #11: 0x000000018a3c3e80 dyld`start + 6688
+  thread #2
+    frame #0: 0x000000018a75afcc libsystem_kernel.dylib`kevent + 8
+    frame #1: 0x00000001028494a0 geryon_tests`boost::asio::detail::kqueue_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) + 96
+    frame #2: 0x000000010284f244 geryon_tests`boost::asio::detail::scheduler::run(boost::system::error_code&) (.isra.0) + 312
+    frame #3: 0x000000010284f908 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_primary(unsigned short)::'lambda'()>>>::_M_run() + 36
+    frame #4: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #5: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #3
+    frame #0: 0x000000018a75afcc libsystem_kernel.dylib`kevent + 8
+    frame #1: 0x00000001028494a0 geryon_tests`boost::asio::detail::kqueue_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) + 96
+    frame #2: 0x000000010284f244 geryon_tests`boost::asio::detail::scheduler::run(boost::system::error_code&) (.isra.0) + 312
+    frame #3: 0x000000010284facc geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_replica(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, unsigned short)::'lambda'()>>>::_M_run() + 36
+    frame #4: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #5: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #4
+    frame #0: 0x000000018a75afcc libsystem_kernel.dylib`kevent + 8
+    frame #1: 0x00000001028494a0 geryon_tests`boost::asio::detail::kqueue_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) + 96
+    frame #2: 0x000000010284f244 geryon_tests`boost::asio::detail::scheduler::run(boost::system::error_code&) (.isra.0) + 312
+    frame #3: 0x000000010284facc geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_replica(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, unsigned short)::'lambda'()>>>::_M_run() + 36
+    frame #4: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #5: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #5
+    frame #0: 0x000000018a75afcc libsystem_kernel.dylib`kevent + 8
+    frame #1: 0x00000001028494a0 geryon_tests`boost::asio::detail::kqueue_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) + 96
+    frame #2: 0x000000010284f244 geryon_tests`boost::asio::detail::scheduler::run(boost::system::error_code&) (.isra.0) + 312
+    frame #3: 0x000000010284facc geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_replica(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, unsigned short)::'lambda'()>>>::_M_run() + 36
+    frame #4: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #5: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #6
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #7
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #8
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #9
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #10
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #11
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #12
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #13
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #14
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #15
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #16
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+  thread #17
+    frame #0: 0x000000018a75850c libsystem_kernel.dylib`__psynch_cvwait + 8
+    frame #1: 0x000000018a79a1d0 libsystem_pthread.dylib`_pthread_cond_wait + 980
+    frame #2: 0x00000001028545d8 geryon_tests`geryon::NetworkNode::request_page(void*) + 332
+    frame #3: 0x0000000102845b1c geryon_tests`geryon::GlobalFaultRegistry::sig_handler(int, __siginfo*, void*) + 408
+    frame #4: 0x000000018a7a4144 libsystem_platform.dylib`_sigtramp + 56
+    frame #5: 0x000000010283da88 geryon_tests`std::thread::_State_impl<std::thread::_Invoker<std::tuple<CorrectnessTest_MultithreadMultipageCorrectness_Test::TestBody()::'lambda1'(void*), void*>>>::_M_run() + 136
+    frame #6: 0x0000000102fa783c libstdc++.6.dylib`execute_native_thread_routine + 28
+    frame #7: 0x000000018a799d00 libsystem_pthread.dylib`_pthread_start + 136
+(lldb) quit

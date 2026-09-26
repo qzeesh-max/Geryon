@@ -1,0 +1,124 @@
+[New LWP 703]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+0x0000ff13858b1d6c in __futex_abstimed_wait_common64 (private=0, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0xffffdeaa81ac) at ./nptl/futex-internal.c:57
+
+Thread 2 (Thread 0xff137bf77160 (LWP 703) "geryon_tests"):
+#0  0x0000ff138591be74 in __GI_epoll_pwait (epfd=5, events=0xff137bf75e48, maxevents=128, timeout=-1, set=0x0) at ../sysdeps/unix/sysv/linux/epoll_pwait.c:40
+#1  0x0000b3ebd4cc5b18 in boost::asio::detail::epoll_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) ()
+#2  0x0000b3ebd4cb948c in boost::asio::detail::scheduler::run(boost::system::error_code&) [clone .isra.0] ()
+#3  0x0000b3ebd4cb9a10 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_replica(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned short)::{lambda()#1}> > >::_M_run() ()
+#4  0x0000ff1385bc1ae0 in ?? () from /lib/aarch64-linux-gnu/libstdc++.so.6
+#5  0x0000ff13858b582c [PAC] in start_thread (arg=0x0) at ./nptl/pthread_create.c:447
+#6  0x0000ff138591b8dc in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:79
+
+Thread 1 (Thread 0xff1385da0020 (LWP 702) "geryon_tests"):
+#0  0x0000ff13858b1d6c in __futex_abstimed_wait_common64 (private=0, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0xffffdeaa81ac) at ./nptl/futex-internal.c:57
+#1  __futex_abstimed_wait_common (cancel=true, private=0, abstime=0x0, clockid=0, expected=0, futex_word=0xffffdeaa81ac) at ./nptl/futex-internal.c:87
+#2  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0xffffdeaa81ac, expected=expected@entry=0, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#3  0x0000ff13858b49f0 in __pthread_cond_wait_common (abstime=0x0, clockid=0, mutex=0xffffdeaa8150, cond=0xffffdeaa8180) at ./nptl/pthread_cond_wait.c:503
+#4  ___pthread_cond_wait (cond=0xffffdeaa8180, mutex=0xffffdeaa8150) at ./nptl/pthread_cond_wait.c:627
+#5  0x0000b3ebd4cbea6c in geryon::NetworkNode::request_page(void*) ()
+#6  0x0000b3ebd4cb7340 in geryon::GlobalFaultRegistry::sig_handler(int, siginfo_t*, void*) ()
+#7  <signal handler called>
+#8  0x0000b3ebd4cb3788 in run_replica(unsigned short, int) ()
+#9  0x0000b3ebd4cb5368 in DistributedSortTest_MultiprocessPiecewiseSort_Test::TestBody() ()
+#10 0x0000b3ebd4d0c9f0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) ()
+#11 0x0000b3ebd4cfb654 in testing::Test::Run() [clone .part.0] ()
+#12 0x0000b3ebd4cfba10 in testing::TestInfo::Run() ()
+#13 0x0000b3ebd4cfbff8 in testing::TestSuite::Run() [clone .part.0] ()
+#14 0x0000b3ebd4d02ac0 in testing::internal::UnitTestImpl::RunAllTests() ()
+#15 0x0000b3ebd4cfc17c in testing::UnitTest::Run() ()
+#16 0x0000b3ebd4c92ff0 in main ()
+[Inferior 1 (process 702) detached]
+[New LWP 699]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+0x0000f17958cb1d6c in __futex_abstimed_wait_common64 (private=0, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0xffffd10854a8) at ./nptl/futex-internal.c:57
+
+Thread 2 (Thread 0xf1794f377160 (LWP 699) "geryon_tests"):
+#0  0x0000f17958d1be74 in __GI_epoll_pwait (epfd=5, events=0xf1794f375e48, maxevents=128, timeout=-1, set=0x0) at ../sysdeps/unix/sysv/linux/epoll_pwait.c:40
+#1  0x0000b00ac7405b18 in boost::asio::detail::epoll_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) ()
+#2  0x0000b00ac73f948c in boost::asio::detail::scheduler::run(boost::system::error_code&) [clone .isra.0] ()
+#3  0x0000b00ac73f9a10 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_replica(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned short)::{lambda()#1}> > >::_M_run() ()
+#4  0x0000f17958fc1ae0 in ?? () from /lib/aarch64-linux-gnu/libstdc++.so.6
+#5  0x0000f17958cb582c [PAC] in start_thread (arg=0x0) at ./nptl/pthread_create.c:447
+#6  0x0000f17958d1b8dc in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:79
+
+Thread 1 (Thread 0xf179591a2020 (LWP 698) "geryon_tests"):
+#0  0x0000f17958cb1d6c in __futex_abstimed_wait_common64 (private=0, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0xffffd10854a8) at ./nptl/futex-internal.c:57
+#1  __futex_abstimed_wait_common (cancel=true, private=0, abstime=0x0, clockid=0, expected=0, futex_word=0xffffd10854a8) at ./nptl/futex-internal.c:87
+#2  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0xffffd10854a8, expected=expected@entry=0, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#3  0x0000f17958cb49f0 in __pthread_cond_wait_common (abstime=0x0, clockid=0, mutex=0xffffd1085450, cond=0xffffd1085480) at ./nptl/pthread_cond_wait.c:503
+#4  ___pthread_cond_wait (cond=0xffffd1085480, mutex=0xffffd1085450) at ./nptl/pthread_cond_wait.c:627
+#5  0x0000b00ac73fea6c in geryon::NetworkNode::request_page(void*) ()
+#6  0x0000b00ac73f7340 in geryon::GlobalFaultRegistry::sig_handler(int, siginfo_t*, void*) ()
+#7  <signal handler called>
+#8  0x0000b00ac73f3788 in run_replica(unsigned short, int) ()
+#9  0x0000b00ac73f5368 in DistributedSortTest_MultiprocessPiecewiseSort_Test::TestBody() ()
+#10 0x0000b00ac744c9f0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) ()
+#11 0x0000b00ac743b654 in testing::Test::Run() [clone .part.0] ()
+#12 0x0000b00ac743ba10 in testing::TestInfo::Run() ()
+#13 0x0000b00ac743bff8 in testing::TestSuite::Run() [clone .part.0] ()
+#14 0x0000b00ac7442ac0 in testing::internal::UnitTestImpl::RunAllTests() ()
+#15 0x0000b00ac743c17c in testing::UnitTest::Run() ()
+#16 0x0000b00ac73d2ff0 in main ()
+[Inferior 1 (process 698) detached]
+[New LWP 695]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+0x0000f4c97521bd90 in __GI___clock_nanosleep (clock_id=<optimized out>, clock_id@entry=0, flags=flags@entry=0, req=0xffffea69fc60, rem=0xffffea69fc60) at ../sysdeps/unix/sysv/linux/clock_nanosleep.c:78
+
+Thread 2 (Thread 0xf4c96b8a7160 (LWP 695) "geryon_tests"):
+#0  0x0000f4c97524be74 in __GI_epoll_pwait (epfd=5, events=0xf4c96b8a5e48, maxevents=128, timeout=-1, set=0x0) at ../sysdeps/unix/sysv/linux/epoll_pwait.c:40
+#1  0x0000afc39ba15b18 in boost::asio::detail::epoll_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) ()
+#2  0x0000afc39ba0948c in boost::asio::detail::scheduler::run(boost::system::error_code&) [clone .isra.0] ()
+#3  0x0000afc39ba09a10 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_replica(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned short)::{lambda()#1}> > >::_M_run() ()
+#4  0x0000f4c9754f1ae0 in ?? () from /lib/aarch64-linux-gnu/libstdc++.so.6
+#5  0x0000f4c9751e582c [PAC] in start_thread (arg=0x0) at ./nptl/pthread_create.c:447
+#6  0x0000f4c97524b8dc in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:79
+
+Thread 1 (Thread 0xf4c9756d5020 (LWP 694) "geryon_tests"):
+#0  0x0000f4c97521bd90 in __GI___clock_nanosleep (clock_id=<optimized out>, clock_id@entry=0, flags=flags@entry=0, req=0xffffea69fc60, rem=0xffffea69fc60) at ../sysdeps/unix/sysv/linux/clock_nanosleep.c:78
+#1  0x0000f4c9752260bc in __GI___nanosleep (req=<optimized out>, rem=<optimized out>) at ../sysdeps/unix/sysv/linux/nanosleep.c:25
+#2  0x0000afc39ba037b0 in run_replica(unsigned short, int) ()
+#3  0x0000afc39ba05368 in DistributedSortTest_MultiprocessPiecewiseSort_Test::TestBody() ()
+#4  0x0000afc39ba5c9f0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) ()
+#5  0x0000afc39ba4b654 in testing::Test::Run() [clone .part.0] ()
+#6  0x0000afc39ba4ba10 in testing::TestInfo::Run() ()
+#7  0x0000afc39ba4bff8 in testing::TestSuite::Run() [clone .part.0] ()
+#8  0x0000afc39ba52ac0 in testing::internal::UnitTestImpl::RunAllTests() ()
+#9  0x0000afc39ba4c17c in testing::UnitTest::Run() ()
+#10 0x0000afc39b9e2ff0 in main ()
+[Inferior 1 (process 694) detached]
+[New LWP 691]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+0x0000facdb0c11d6c in __futex_abstimed_wait_common64 (private=0, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0xfffff0bd8d74) at ./nptl/futex-internal.c:57
+
+Thread 2 (Thread 0xfacda7159160 (LWP 691) "geryon_tests"):
+#0  0x0000facdb0c7be74 in __GI_epoll_pwait (epfd=5, events=0xfacda7157e48, maxevents=128, timeout=-1, set=0x0) at ../sysdeps/unix/sysv/linux/epoll_pwait.c:40
+#1  0x0000b76c4d5a5b18 in boost::asio::detail::epoll_reactor::run(long, boost::asio::detail::op_queue<boost::asio::detail::scheduler_operation>&) ()
+#2  0x0000b76c4d59948c in boost::asio::detail::scheduler::run(boost::system::error_code&) [clone .isra.0] ()
+#3  0x0000b76c4d599c50 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<geryon::NetworkNode::start_primary(unsigned short)::{lambda()#1}> > >::_M_run() ()
+#4  0x0000facdb0f21ae0 in ?? () from /lib/aarch64-linux-gnu/libstdc++.so.6
+#5  0x0000facdb0c1582c [PAC] in start_thread (arg=0x0) at ./nptl/pthread_create.c:447
+#6  0x0000facdb0c7b8dc in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:79
+
+Thread 1 (Thread 0xfacdb10fe020 (LWP 690) "geryon_tests"):
+#0  0x0000facdb0c11d6c in __futex_abstimed_wait_common64 (private=0, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0xfffff0bd8d74) at ./nptl/futex-internal.c:57
+#1  __futex_abstimed_wait_common (cancel=true, private=0, abstime=0x0, clockid=0, expected=0, futex_word=0xfffff0bd8d74) at ./nptl/futex-internal.c:87
+#2  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0xfffff0bd8d74, expected=expected@entry=0, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#3  0x0000facdb0c149f0 in __pthread_cond_wait_common (abstime=0x0, clockid=0, mutex=0xfffff0bd8d18, cond=0xfffff0bd8d48) at ./nptl/pthread_cond_wait.c:503
+#4  ___pthread_cond_wait (cond=0xfffff0bd8d48, mutex=0xfffff0bd8d18) at ./nptl/pthread_cond_wait.c:627
+#5  0x0000b76c4d59ea6c in geryon::NetworkNode::request_page(void*) ()
+#6  0x0000b76c4d59ef1c in geryon::NetworkNode::trigger_synchronization() ()
+#7  0x0000b76c4d595a08 in DistributedSortTest_MultiprocessPiecewiseSort_Test::TestBody() ()
+#8  0x0000b76c4d5ec9f0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) ()
+#9  0x0000b76c4d5db654 in testing::Test::Run() [clone .part.0] ()
+#10 0x0000b76c4d5dba10 in testing::TestInfo::Run() ()
+#11 0x0000b76c4d5dbff8 in testing::TestSuite::Run() [clone .part.0] ()
+#12 0x0000b76c4d5e2ac0 in testing::internal::UnitTestImpl::RunAllTests() ()
+#13 0x0000b76c4d5dc17c in testing::UnitTest::Run() ()
+#14 0x0000b76c4d572ff0 in main ()
+[Inferior 1 (process 690) detached]

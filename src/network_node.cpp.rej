@@ -1,0 +1,8 @@
+@@ -227,6 +230,7 @@
+ 
+         if (should_send) {
+             // Give up ownership and send to Primary
++            std::this_thread::sleep_for(std::chrono::microseconds(100));
+             send_page_data(0, page_index);
+         }
+         start_replica_read_loop();
