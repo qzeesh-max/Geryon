@@ -13,6 +13,7 @@ add_executable(geryon_tests
     test_network_recovery.cpp
     test_memnon_segmented.cpp
     test_robust_lock.cpp
+    test_robust_sync.cpp
 )
 
 target_link_libraries(geryon_tests
