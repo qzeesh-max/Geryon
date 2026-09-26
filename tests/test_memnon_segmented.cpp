@@ -77,6 +77,10 @@
 #include <iostream>
 #include <stdexcept>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace geryon;
 namespace si = segmented_interprocess;
 
@@ -223,15 +227,24 @@ static void run_primary() {
     std::string cmd = g_exec_path
         + " --gtest_filter=MemnonSegmentedTest.TransactionalGrowthAcrossNodes"
         + " --run_as_memnon_replica";
+
 #ifdef _WIN32
-    cmd = "start /B \"\" \"" + g_exec_path
-        + "\" --gtest_filter=MemnonSegmentedTest.TransactionalGrowthAcrossNodes"
-        + " --run_as_memnon_replica";
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+    std::string args_cmd = cmd;
+    if (!CreateProcessA(NULL, &args_cmd[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        throw std::runtime_error("CreateProcessA failed");
+    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
 #else
     cmd += " &";
-#endif
     std::thread replica_launcher([cmd]() { std::system(cmd.c_str()); });
     replica_launcher.detach();
+#endif
 
     // Brief pause to let the replica connect before we start committing.
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
@@ -463,18 +476,7 @@ static void run_replica() {
 std::string g_exec_path; // shared with run_primary()
 
 TEST(MemnonSegmentedTest, TransactionalGrowthAcrossNodes) {
-#ifdef _WIN32
-    // Spawning a replica subprocess requires std::system("start /B ..."), which
-    // needs an active cmd.exe session.  When running directly under CrossOver /
-    // Wine (without a cmd.exe parent) the spawn silently fails and the primary
-    // hangs waiting for replica_done.  All other multiprocess tests that rely on
-    // subprocess spawning have the same limitation on Windows.
-    //
-    // The Memnon Win32 backend (sparse-file + CreateFileMapping) is itself fully
-    // exercised by test_memnon_integration, so no coverage is lost here.
-    GTEST_SKIP() << "Subprocess spawning via cmd.exe is not available when "
-                    "running directly under CrossOver/Wine.";
-#endif
+    // (Subprocess correctly spawned natively without cmd.exe via CreateProcessA)
 
     const auto& args = testing::internal::GetArgvs();
 

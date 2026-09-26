@@ -29,6 +29,10 @@
 #include <random>
 #include <iostream>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace geryon;
 
 const int NUM_ELEMENTS = 20000000;
@@ -141,15 +145,26 @@ TEST(DistributedSortTest, MultiprocessPiecewiseSort) {
     for (int i = 1; i <= NUM_REPLICAS; ++i) {
         process_waiters.emplace_back([=]() {
 #ifdef _WIN32
-            std::string cmd = "start /B \"\" \"" + exec_path + "\" --gtest_filter=DistributedSortTest.MultiprocessPiecewiseSort --run_as_replica"
+            std::string cmd = exec_path + " --gtest_filter=DistributedSortTest.MultiprocessPiecewiseSort --run_as_replica"
                             + " --replica_port=" + std::to_string(port)
                             + " --replica_index=" + std::to_string(i);
+            STARTUPINFOA si;
+            PROCESS_INFORMATION pi;
+            ZeroMemory(&si, sizeof(si));
+            si.cb = sizeof(si);
+            ZeroMemory(&pi, sizeof(pi));
+            std::string args_cmd = cmd;
+            if (!CreateProcessA(NULL, &args_cmd[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+                throw std::runtime_error("CreateProcessA failed");
+            }
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
 #else
             std::string cmd = exec_path + " --gtest_filter=DistributedSortTest.MultiprocessPiecewiseSort --run_as_replica"
                             + " --replica_port=" + std::to_string(port)
                             + " --replica_index=" + std::to_string(i) + " &";
-#endif
             std::system(cmd.c_str());
+#endif
         });
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }

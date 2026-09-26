@@ -95,20 +95,49 @@ int run_replica_that_grabs_lock(uint16_t port) {
 // -------------------------------------------------------------------------------------------------
 
 TEST_F(RobustLockTest, LockRecoveryAfterCrash) {
-#ifdef _WIN32
-    GTEST_SKIP() << "Skipping subprocess crash test on Windows due to CrossOver limitations";
-#else
+    const auto& args = testing::internal::GetArgvs();
+    bool is_replica = false;
+    uint16_t replica_port = 0;
+    for (const auto& arg : args) {
+        if (arg == "--run_as_robust_lock_replica") {
+            is_replica = true;
+        } else if (arg.find("--replica_port=") == 0) {
+            replica_port = std::stoi(arg.substr(13));
+        }
+    }
+
+    if (is_replica) {
+        run_replica_that_grabs_lock(replica_port);
+        std::exit(0);
+    }
+
+    std::string exec_path = args[0];
+
     network_node->start_primary(port);
 
     SharedState* state = reinterpret_cast<SharedState*>(region->base_address());
     new (state) SharedState();
     state->data = 0;
 
+    std::string cmd = exec_path + " --gtest_filter=RobustLockTest.LockRecoveryAfterCrash --run_as_robust_lock_replica --replica_port=" + std::to_string(port);
+
+#ifdef _WIN32
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+    std::string args_cmd = cmd;
+    if (!CreateProcessA(NULL, &args_cmd[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        FAIL() << "CreateProcessA failed";
+    }
+#else
     pid_t pid = fork();
     if (pid == 0) {
         // Child process
         std::exit(run_replica_that_grabs_lock(port));
     }
+#endif
 
     // Wait for the child to grab the lock and write 42
     auto start_wait_replica = std::chrono::steady_clock::now();
@@ -140,8 +169,15 @@ TEST_F(RobustLockTest, LockRecoveryAfterCrash) {
 
     // Kill the replica!
     std::cout << "Primary killing replica process..." << std::endl;
+#ifdef _WIN32
+    TerminateProcess(pi.hProcess, 1);
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+#else
     kill(pid, SIGKILL);
     waitpid(pid, nullptr, 0);
+#endif
 
     // After the child is killed, the network node should notice the disconnect,
     // update the cluster state, and the acquirer thread should detect this
@@ -163,5 +199,4 @@ TEST_F(RobustLockTest, LockRecoveryAfterCrash) {
     EXPECT_TRUE(recovered) << "Failed to recover the lock after replica crash";
     EXPECT_TRUE(owner_died_flag.load()) << "Expected lock acquisition to report owner_died";
     EXPECT_EQ(state->data, 42) << "Expected replica to have written to data before crashing";
-#endif
 }
