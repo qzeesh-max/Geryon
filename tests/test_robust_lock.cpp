@@ -41,6 +41,9 @@ protected:
     }
 
     void TearDown() override {
+        if (fault_handler && region) {
+            fault_handler->unregister_region(region->base_address());
+        }
         network_node->stop();
         network_node.reset();
         fault_handler.reset();
