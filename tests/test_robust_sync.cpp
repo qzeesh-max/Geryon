@@ -138,7 +138,7 @@ TEST_P(RobustSyncTest, RecoveryAfterCrashOrTimeout) {
     new (state) SharedState();
     state->data = 0;
 
-    std::string cmd = "\"" + exec_path + "\" --gtest_filter=RobustSyncTest.RecoveryAfterCrashOrTimeout/* --run_as_robust_sync_replica --replica_port=" + std::to_string(port) + " --replica_case=" + std::to_string(test_case);
+    std::string cmd = "\"" + exec_path + "\" --gtest_filter=*RobustSyncTest.RecoveryAfterCrashOrTimeout* --run_as_robust_sync_replica --replica_port=" + std::to_string(port) + " --replica_case=" + std::to_string(test_case);
 
 #ifdef _WIN32
     STARTUPINFOA si;
