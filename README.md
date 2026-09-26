@@ -7,6 +7,10 @@ Geryon is a C++26 cross-platform distributed shared memory framework. It transpa
 
 Geryon supports integration with existing memory mapping and interprocess communication libraries, including `boost::interprocess` and the [Memnon](https://github.com/qzeesh-max/Memnon) allocator, effectively transforming local interprocess communication into distributed cluster-wide communication.
 
+## The Mythos
+
+In Greek mythology, Geryon was a fearsome giant of the island Erytheia, known for having one body but three heads, or three bodies joined to one pair of legs. He is a symbol of a multi-bodied entity acting as a single cohesive unit. This perfectly mirrors the architecture of a distributed shared memory framework: multiple distinct network nodes (the heads) seamlessly operating over a single, unified shared memory space (the body).
+
 ## Key Features
 
 *   **Cross-Platform Architecture:** Native implementations for macOS/iOS (Mach exception handling), Linux (sigaction + mprotect), and Windows (Vectored Exception Handling + VirtualAlloc).
